@@ -1,30 +1,50 @@
-html {
-  width: 100%;
-  overflow-x: hidden;
-}
-
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  font-variant: tabular-nums;
-  background-color: var(--c-bg);
-  margin: 0;
+  background: var(--c-bg-color);
 }
 
-// 滚动条美化
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.c-bg-secondary {
+  background-color: var(--c-bg-secondary);
 }
-::-webkit-scrollbar-thumb {
-  background-color: #374151;
-  border-radius: 4px;
-  &:hover {
-    background-color: #1f2937;
-  }
+
+.c-bg-secondary-light {
+  background-color: var(--c-bg-secondary-light);
 }
-::-webkit-scrollbar-track {
-  background-color: #6b7280;
-  border-radius: 4px;
+
+.c-btn-bg-warm {
+  background: linear-gradient(45deg, var(--c-gradient-btn-bg-warm-start), var(--c-gradient-btn-bg-warm-end));
+}
+
+.c-btn-bg-cold {
+  background: linear-gradient(45deg, var(--c-gradient-btn-bg-cold-start), var(--c-gradient-btn-bg-cold-end));
+}
+
+.c-card-bg {
+  background: linear-gradient(45deg, var(--c-gradient-card-bg-start), var(--c-gradient-card-bg-end));
+}
+
+.c-card-bg-light {
+  background: linear-gradient(45deg, var(--c-gradient-card-bg-light-start), var(--c-gradient-card-bg-light-end));
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.c-bg-block {
+  background-image: linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.4) 25%,
+    transparent 25%,
+    transparent 75%,
+    rgba(0, 0, 0, 0.4) 75%
+  ),
+  linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.4) 25%,
+    transparent 25%,
+    transparent 75%,
+    rgba(0, 0, 0, 0.4) 75%
+  );
+  background-position: 0 0, 20px 20px;
+  background-size: 40px 40px;
 }

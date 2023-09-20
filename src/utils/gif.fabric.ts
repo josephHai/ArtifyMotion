@@ -145,7 +145,7 @@ export async function fabricGif(
                 frame.dims.height
               )
 
-              if (previousFrame?.disposalType === 2) {
+              if (previousFrame && previousFrame.disposalType === 2) {
                 const { width, height, left, top } = previousFrame.dims
                 gifCtx.clearRect(left, top, width, height)
               }

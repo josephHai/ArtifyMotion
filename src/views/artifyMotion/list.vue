@@ -1,0 +1,320 @@
+<template>
+  <div>
+    <div>
+      <el-image
+        class="w-100"
+        fit="fill"
+        src="	https://media.giphy.com/headers/2023-06-27-43-1687866231/DailyAffurmationsDesktop-V3.gif"
+      />
+    </div>
+    <!-- 最近上传的文件 -->
+    <div v-if="false">
+      <el-row>
+        <el-icon color="#6a2c70" size="24">
+          <i-ep-clock />
+        </el-icon>
+        <span class="h5 fw-semibold text-white mx-2">Latest</span>
+      </el-row>
+      <el-row :gutter="5">
+        <el-col
+          :span="4"
+          v-for="file in latestFiles"
+          :key="file['fid']"
+          class="image-container"
+        >
+          <el-image
+            class="rounded-1"
+            style="width: 100%; height: 200px"
+            fit="cover"
+            :src="file['media']['preview']['url']"
+          />
+          <div class="overlay text-center">
+            <el-row :gutter="40" style="z-index: 100">
+              <el-col :span="6">
+                <el-tooltip
+                  effect="dark"
+                  content="edit"
+                  placement="top"
+                  :show-arrow="false"
+                  :offset="2"
+                >
+                  <el-icon
+                    size="large"
+                    color="white"
+                    class="pointer"
+                    @click="navigateTo('edit', { id: file['fid'] })"
+                  >
+                    <i-ep-edit />
+                  </el-icon>
+                </el-tooltip>
+              </el-col>
+              <el-col :span="6">
+                <el-tooltip
+                  effect="dark"
+                  content="creation"
+                  placement="top"
+                  :show-arrow="false"
+                  :offset="2"
+                >
+                  <el-icon
+                    size="large"
+                    color="white"
+                    class="pointer"
+                    @click="navigateTo('replace', { id: file['fid'] })"
+                  >
+                    <i-ep-promotion />
+                  </el-icon>
+                </el-tooltip>
+              </el-col>
+            </el-row>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
+    <!-- 最近上传的文件结束 -->
+    <!-- 最多次下载的文件 -->
+    <div class="mt-5" v-if="false">
+      <el-row>
+        <el-icon color="#b83b5e" size="24">
+          <i-ep-download />
+        </el-icon>
+        <span class="h5 fw-semibold text-white mx-2">Most Download</span>
+      </el-row>
+      <el-row :gutter="5">
+        <el-col
+          :span="4"
+          v-for="file in mostDownloadFiles"
+          :key="file['fid']"
+          class="image-container"
+        >
+          <el-image
+            class="rounded-1"
+            style="width: 100%; height: 200px"
+            fit="cover"
+            :src="file['media']['preview']['url']"
+          />
+          <div class="overlay text-center">
+            <el-row :gutter="40" style="z-index: 100">
+              <el-col :span="6">
+                <el-tooltip
+                  effect="dark"
+                  content="edit"
+                  placement="top"
+                  :show-arrow="false"
+                  :offset="2"
+                >
+                  <el-icon
+                    size="large"
+                    color="white"
+                    class="pointer"
+                    @click="navigateTo('edit', { id: file['fid'] })"
+                  >
+                    <i-ep-edit />
+                  </el-icon>
+                </el-tooltip>
+              </el-col>
+              <el-col :span="6">
+                <el-tooltip
+                  effect="dark"
+                  content="creation"
+                  placement="top"
+                  :show-arrow="false"
+                  :offset="2"
+                >
+                  <el-icon
+                    size="large"
+                    color="white"
+                    class="pointer"
+                    @click="navigateTo('replace', { id: file['fid'] })"
+                  >
+                    <i-ep-promotion />
+                  </el-icon>
+                </el-tooltip>
+              </el-col>
+            </el-row>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
+    <!-- 最多次下载的文件结束 -->
+    <!-- 文件列表 -->
+    <div class="mt-5" element-loading-background="rgba(0,0,0,0)">
+      <el-row>
+        <el-icon color="#f08a5d" size="24">
+          <i-ep-files />
+        </el-icon>
+        <span class="h5 fw-semibold text-white mx-2">Lists</span>
+      </el-row>
+      <el-container>
+        <el-row :gutter="5">
+          <el-col
+            class="pointer image-container"
+            v-for="file in fileList"
+            :key="file['fid']"
+            :span="file['span']"
+          >
+            <el-image
+              class="rounded-1"
+              fit="cover"
+              style="width: 100%; height: 314px"
+              :src="file['media']['preview']['url']"
+            />
+            <div class="overlay text-center">
+              <el-row :gutter="40" style="z-index: 100">
+                <el-col :span="6">
+                  <el-tooltip
+                    effect="dark"
+                    content="edit"
+                    placement="top"
+                    :show-arrow="false"
+                    :offset="2"
+                  >
+                    <el-icon
+                      size="large"
+                      color="white"
+                      class="pointer"
+                      @click="navigateTo('edit', { id: file['fid'] })"
+                    >
+                      <i-ep-edit />
+                    </el-icon>
+                  </el-tooltip>
+                </el-col>
+                <el-col :span="6">
+                  <el-tooltip
+                    effect="dark"
+                    content="creation"
+                    placement="top"
+                    :show-arrow="false"
+                    :offset="2"
+                  >
+                    <el-icon
+                      size="large"
+                      color="white"
+                      class="pointer"
+                      @click="navigateTo('replace', { id: file['fid'] })"
+                    >
+                      <i-ep-promotion />
+                    </el-icon>
+                  </el-tooltip>
+                </el-col>
+              </el-row>
+            </div>
+          </el-col>
+        </el-row>
+      </el-container>
+      <el-container
+        v-observe-visibility="{
+          callback: loadingData,
+        }"
+        class="mt-3"
+      >
+        <div v-if="hasData" class="m-auto">
+          <icon-loading />
+        </div>
+        <div v-else class="m-auto">
+          <span class="text-secondary">No more data!</span>
+        </div>
+      </el-container>
+    </div>
+    <!-- 文件列表结束 -->
+  </div>
+</template>
+
+<script setup lang="ts">
+import router from '@/router'
+import { getFilesList } from '@/api/file'
+import IconLoading from '@/components/icon-loading.vue'
+
+const latestFiles = ref<object[]>()
+const mostDownloadFiles = ref<object[]>()
+const fileList = ref<object[]>([])
+const busy = ref<boolean>(false)
+const hasData = ref<boolean>(true)
+const curPage = ref<number>(0)
+let curSpans = 0
+
+const getLatestFiles = () => {
+  let params = {
+    limit: 6,
+  }
+  getFilesList(params).then((res) => {
+    latestFiles.value = res.data
+  })
+}
+
+const navigateTo = (name, params) => {
+  router.push({
+    name,
+    params,
+  })
+}
+
+const getMostDownloadFiles = () => {
+  let params = {
+    limit: 6,
+    orderBy: 'download',
+  }
+  getFilesList(params).then((res) => {
+    mostDownloadFiles.value = res.data
+  })
+}
+
+const getList = () => {
+  busy.value = true
+  curPage.value += 1
+  let params = {
+    page: curPage.value,
+    limit: 10,
+  }
+
+  getFilesList(params).then((res) => {
+    let temp = res.data
+    hasData.value = temp.length > 0
+
+    temp.forEach((item) => {
+      const width = item.media.preview.dims[0]
+      const height = item.media.preview.dims[1]
+      if (width / height >= 1.3) {
+        item['span'] = curSpans + 12 > 24 ? 6 : 12
+      } else {
+        item['span'] = 6
+      }
+      curSpans = curSpans + item['span'] == 24 ? 0 : curSpans + item['span']
+      fileList.value.push(item)
+    })
+    busy.value = false
+  })
+}
+
+const loadingData = (visible) => {
+  if (visible && hasData.value && !busy.value) getList()
+}
+
+onMounted(() => {
+  getLatestFiles()
+  getMostDownloadFiles()
+})
+</script>
+
+<style scoped lang="less">
+.image-container {
+  position: relative;
+}
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-container:hover .overlay {
+  opacity: 1;
+}
+</style>

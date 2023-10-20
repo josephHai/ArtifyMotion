@@ -1,12 +1,12 @@
 <template>
-  <loading
+  <icon-loading
     class="rotate-icon"
     :style="{ width: props.width + 'px', height: props.width + 'px' }"
   />
 </template>
 
 <script setup lang="ts">
-import { loading } from '@/assets/icon'
+import { IconLoading } from '@/assets/icon'
 
 defineComponent({
   name: 'IconLoading',

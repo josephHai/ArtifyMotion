@@ -1,5 +1,10 @@
 <template>
-  <div class="w-75 m-auto">
+  <div
+    class="w-75 m-auto"
+    v-loading="parseUrlLoading"
+    element-loading-text="Parsing the URL..."
+    element-loading-background="rgba(88, 88, 88, 0.8)"
+  >
     <el-card class="c-card-bg text-white border-0">
       <div>
         <el-row>
@@ -72,25 +77,41 @@
 <script lang="ts" setup>
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
+import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 const parseUrl = ref<string>('')
 const uploadFileStore = useUploadFileStore()
+const targetRoute = ref<string>('finalize')
+const parseUrlLoading = ref<boolean>(false)
 
 const parseUrlChange = () => {
   if (parseUrl.value.indexOf('.gif') != -1) {
+    parseUrlLoading.value = true
     isImageUrl(parseUrl.value).then((res) => {
       if (res) {
         fetch(parseUrl.value).then((res) => {
+          const urlPart = parseUrl.value.split('/')
           res.blob().then((blob) => {
             uploadFileStore.url = parseUrl.value
-            uploadFileStore.file = new File([blob], '', { type: blob.type })
+            uploadFileStore.file = new File(
+              [blob],
+              urlPart[urlPart.length - 1],
+              {
+                type: blob.type,
+              }
+            )
+            parseUrlLoading.value = false
             router.push({
-              name: 'finalize',
+              name: targetRoute.value,
             })
           })
         })
       } else {
-        console.log('not url')
+        ElMessage({
+          type: 'error',
+          message: 'Invalid Url',
+        })
       }
     })
   }
@@ -104,11 +125,11 @@ const handleUpload = (uploadFile) => {
   reader.onload = (e) => {
     uploadFileStore.updateUploadFile(
       '',
-      e.target?.result.toString(),
+      e.target!.result.toString(),
       uploadFile
     )
     router.push({
-      name: 'finalize',
+      name: targetRoute.value,
     })
   }
 }
@@ -131,6 +152,10 @@ const isImageUrl = async (url: string): Promise<boolean> => {
     return false
   }
 }
+
+onMounted(() => {
+  if (useRoute().params.behavior) targetRoute.value = 'creation'
+})
 </script>
 
 <style scoped lang="less">

@@ -161,18 +161,25 @@ const handleClose = (tag: string) => {
 const handleUpload = () => {
   const formData = new FormData()
 
-  formData.append('file', uploadFileStore.file['raw'])
+  formData.append(
+    'file',
+    uploadFileStore.url ? uploadFileStore.file : uploadFileStore.file['raw']
+  )
   formData.append('accessPermission', visibility ? 'public' : 'private')
   formData.append('tags', tags.value.join(''))
 
-  uploadFile(formData).then((res) => {
-    ElMessage({
-      message: res['msg'],
-      type: 'success',
-      duration: 5 * 1000,
+  uploadFile(formData)
+    .then((res) => {
+      ElMessage({
+        message: res['msg'],
+        type: 'success',
+        duration: 5 * 1000,
+      })
+      goBack()
     })
-    goBack()
-  })
+    .catch((e) => {
+      console.log(e)
+    })
 }
 
 onMounted(() => {

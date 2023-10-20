@@ -1,26 +1,33 @@
 # ArtifyMotion
 
-这是一个对GIF和图片进行二次创作的平台，可以对GIF和图片进行人脸替换、文字添加等操作。平台提供一系列的GIF和图片以及可替换的素材，同时也可以由用户自主上传GIF及替换素材。
-
-## 硬件
+This is a platform for creative remixing of GIFs and images, where you can perform actions such as face swapping and adding text to GIFs and images. The platform offers a variety of GIFs and images, along with customizable assets for replacement, and users can also upload their own GIFs and replacement materials.
+## Hardware
 
 * **OS**: CentOS 7x64
-* **CPU**: 4核心8线程
-* **内存**：8G
-* **带宽**：10M
+* **CPU**: 4 cores, 8 threads
+* **Memory**：8G
+* **Bandwidth**：10M
 
-## 开发环境
+## Development Environment
 
-* 服务器：Nginx
-* 后端：Django, MySQL8.0
-* 前端：Vue3, npm@9.7.2, node@v20.4.0
+* Server：Nginx
+* Backend：Django, MySQL8.0
+* Frontend：Vue3, npm@9.7.2, node@v20.4.0
 
-## 页面
+## Pages
 
-### 首页
+### Material List Page
+![list.png](intro/images/list.png)
 
-### 素材列表页
+### Material Upload Page
 
-### 素材上传页
+![upload.png](intro/images/upload.png)
 
-### 头像识别及替换页
+![finalize.png](intro/images/finalize.png)
+
+### Creation Page
+
+![creation.gif](intro/images/creation.gif)
+
+### Website
+[memefun (http://www.memefun.xyz)](http://www.memefun.xyz)

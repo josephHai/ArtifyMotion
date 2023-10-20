@@ -1,12 +1,18 @@
 <template>
   <div>
-    <div>
-      <el-image
-        class="w-100"
-        fit="fill"
-        src="	https://media.giphy.com/headers/2023-06-27-43-1687866231/DailyAffurmationsDesktop-V3.gif"
-      />
-    </div>
+    <el-input
+      v-model="keywords"
+      :placeholder="$t('tips.input')"
+      class="searchBox"
+      size="large"
+      v-if="route.name === 'list'"
+    >
+      <template #append>
+        <el-icon size="20" color="white" @click="handleSearch"
+          ><i-ep-search
+        /></el-icon>
+      </template>
+    </el-input>
     <!-- 最近上传的文件 -->
     <div v-if="false">
       <el-row>
@@ -96,40 +102,9 @@
           <div class="overlay text-center">
             <el-row :gutter="40" style="z-index: 100">
               <el-col :span="6">
-                <el-tooltip
-                  effect="dark"
-                  content="edit"
-                  placement="top"
-                  :show-arrow="false"
-                  :offset="2"
-                >
-                  <el-icon
-                    size="large"
-                    color="white"
-                    class="pointer"
-                    @click="navigateTo('edit', { id: file['fid'] })"
-                  >
-                    <i-ep-edit />
-                  </el-icon>
-                </el-tooltip>
-              </el-col>
-              <el-col :span="6">
-                <el-tooltip
-                  effect="dark"
-                  content="creation"
-                  placement="top"
-                  :show-arrow="false"
-                  :offset="2"
-                >
-                  <el-icon
-                    size="large"
-                    color="white"
-                    class="pointer"
-                    @click="navigateTo('replace', { id: file['fid'] })"
-                  >
-                    <i-ep-promotion />
-                  </el-icon>
-                </el-tooltip>
+                <el-button
+                  @click="navigateTo('creation', { id: file['fid'] })"
+                ></el-button>
               </el-col>
             </el-row>
           </div>
@@ -138,7 +113,7 @@
     </div>
     <!-- 最多次下载的文件结束 -->
     <!-- 文件列表 -->
-    <div class="mt-5" element-loading-background="rgba(0,0,0,0)">
+    <div class="mt-5 m-auto" element-loading-background="rgba(0,0,0,0)">
       <el-row>
         <el-icon color="#f08a5d" size="24">
           <i-ep-files />
@@ -146,7 +121,7 @@
         <span class="h5 fw-semibold text-white mx-2">Lists</span>
       </el-row>
       <el-container>
-        <el-row :gutter="5">
+        <el-row :gutter="10">
           <el-col
             class="pointer image-container"
             v-for="file in fileList"
@@ -164,7 +139,7 @@
                 <el-col :span="6">
                   <el-tooltip
                     effect="dark"
-                    content="edit"
+                    content="Creation"
                     placement="top"
                     :show-arrow="false"
                     :offset="2"
@@ -173,7 +148,7 @@
                       size="large"
                       color="white"
                       class="pointer"
-                      @click="navigateTo('edit', { id: file['fid'] })"
+                      @click="navigateTo('creation', { id: file['fid'] })"
                     >
                       <i-ep-edit />
                     </el-icon>
@@ -182,18 +157,26 @@
                 <el-col :span="6">
                   <el-tooltip
                     effect="dark"
-                    content="creation"
+                    content="Reward"
                     placement="top"
                     :show-arrow="false"
                     :offset="2"
                   >
-                    <el-icon
-                      size="large"
-                      color="white"
-                      class="pointer"
-                      @click="navigateTo('replace', { id: file['fid'] })"
-                    >
-                      <i-ep-promotion />
+                    <el-icon size="large" color="white" class="pointer">
+                      <i-ep-wallet />
+                    </el-icon>
+                  </el-tooltip>
+                </el-col>
+                <el-col :span="6">
+                  <el-tooltip
+                    effect="dark"
+                    content="Like"
+                    placement="top"
+                    :show-arrow="false"
+                    :offset="2"
+                  >
+                    <el-icon size="large">
+                      <icon-like width="24" height="24" />
                     </el-icon>
                   </el-tooltip>
                 </el-col>
@@ -217,13 +200,20 @@
       </el-container>
     </div>
     <!-- 文件列表结束 -->
+    <el-backtop :right="100" :bottom="100">
+      <div class="text-secondary fw-bold" style="font-size: 1.2rem">
+        <i-ep-top />
+      </div>
+    </el-backtop>
   </div>
 </template>
 
 <script setup lang="ts">
 import router from '@/router'
+import { useRoute } from 'vue-router'
 import { getFilesList } from '@/api/file'
 import IconLoading from '@/components/icon-loading.vue'
+import { IconLike } from '@/assets/icon'
 
 const latestFiles = ref<object[]>()
 const mostDownloadFiles = ref<object[]>()
@@ -232,10 +222,13 @@ const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
 const curPage = ref<number>(0)
 let curSpans = 0
+const route = useRoute()
+const keywords = ref<string>('')
 
 const getLatestFiles = () => {
   let params = {
     limit: 6,
+    keywords: keywords.value,
   }
   getFilesList(params).then((res) => {
     latestFiles.value = res.data
@@ -253,6 +246,7 @@ const getMostDownloadFiles = () => {
   let params = {
     limit: 6,
     orderBy: 'download',
+    keywords: keywords.value,
   }
   getFilesList(params).then((res) => {
     mostDownloadFiles.value = res.data
@@ -264,7 +258,8 @@ const getList = () => {
   curPage.value += 1
   let params = {
     page: curPage.value,
-    limit: 10,
+    limit: 40,
+    keywords: keywords.value,
   }
 
   getFilesList(params).then((res) => {
@@ -274,10 +269,10 @@ const getList = () => {
     temp.forEach((item) => {
       const width = item.media.preview.dims[0]
       const height = item.media.preview.dims[1]
-      if (width / height >= 1.3) {
-        item['span'] = curSpans + 12 > 24 ? 6 : 12
+      if (width / height >= 1.5) {
+        item['span'] = curSpans + 8 > 24 ? 4 : 8
       } else {
-        item['span'] = 6
+        item['span'] = 4
       }
       curSpans = curSpans + item['span'] == 24 ? 0 : curSpans + item['span']
       fileList.value.push(item)
@@ -288,6 +283,11 @@ const getList = () => {
 
 const loadingData = (visible) => {
   if (visible && hasData.value && !busy.value) getList()
+}
+
+const handleSearch = () => {
+  fileList.value = []
+  getList()
 }
 
 onMounted(() => {
@@ -316,5 +316,24 @@ onMounted(() => {
 
 .image-container:hover .overlay {
   opacity: 1;
+}
+.searchBox {
+  margin-top: 1%;
+  height: 40px;
+}
+.searchBox {
+  :deep(.el-input-group__append) {
+    height: 50px;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    background: linear-gradient(
+      45deg,
+      var(--c-gradient-btn-bg-cold-start),
+      var(--c-gradient-btn-bg-cold-end)
+    );
+  }
+  :deep(.el-input__wrapper) {
+    height: 50px;
+  }
 }
 </style>

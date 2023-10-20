@@ -14,7 +14,7 @@ export class memeFabric {
     callback: Function
   ) => {
     instance.set({
-      cornerSize: 20,
+      cornerSize: 30,
       borderDashArray: [10, 5],
       borderColor: 'rgba(88, 88, 88, 1)',
       cornerStrokeColor: 'transparent',

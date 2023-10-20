@@ -1,21 +1,54 @@
 <template>
-  <div style="min-height: 650px">
+  <div>
     <el-row justify="space-between">
       <!-- 图片预览 -->
-      <el-col :span="10" ref="sourceImageCanvasBox">
-        <canvas id="source-image-canvas" width="100%" height="auto"></canvas>
+      <el-col
+        :span="10"
+        ref="sourceImageCanvasBox"
+        v-loading="trackLoading"
+        element-loading-text="handling..."
+        element-loading-background="rgba(88, 88, 88, 1)"
+      >
+        <!-- 以gif形式渲染 -->
+        <div v-if="renderMethod === 'gif'">
+          <el-row>
+            <gif-render
+              v-if="sourceImageInfo.url"
+              :box-width="boxWidth"
+              :text="text"
+              :text-scale="textScale"
+              :selected-color="selectedColor"
+              :selected-font-family="selectedFontFamily"
+              :source-image-info="sourceImageInfo"
+              :selected-sticker-url="selectedStickerUrl"
+            />
+          </el-row>
+        </div>
+        <!-- 以gif形式渲染结束 -->
+        <!-- 以帧形式渲染 -->
+        <div v-if="renderMethod === 'frame' && trackResults">
+          <frame-render
+            v-if="sourceImageInfo.url"
+            :box-width="boxWidth"
+            :source-image-info="sourceImageInfo"
+            :selected-sticker-url="selectedStickerUrl"
+            :track-results="trackResults"
+            @fusion="handleFusion"
+          />
+        </div>
+        <!-- 以帧形式渲染结束 -->
       </el-col>
       <!-- 图片预览结束 -->
       <!-- 操作面板 -->
-      <el-col :span="10" style="min-height: 650px">
+      <el-col :span="10">
         <!-- 操作目录 -->
         <el-row>
           <el-radio-group class="w-100 op-radio-group" v-model="op">
             <el-row class="w-100">
-              <el-col :span="12">
+              <el-col v-if="renderMethod === 'gif'" :span="12">
                 <el-radio-button class="w-100" label="Caption" />
               </el-col>
-              <el-col :span="12">
+              <el-col :span="renderMethod === 'frame' ? 24 : 12">
                 <el-radio-button class="w-100" label="Stickers" />
               </el-col>
             </el-row>
@@ -33,7 +66,6 @@
                 :rows="2"
                 type="textarea"
                 placeholder="Enter your caption"
-                @input="handleInput"
               />
             </el-row>
             <!-- 要添加的文字输入框结束 -->
@@ -43,9 +75,9 @@
                 <div
                   style="width: 100%; aspect-ratio: 1 / 1"
                   :style="{ background: color }"
-                  :class="{ 'c-is-active': selectColor === color }"
+                  :class="{ 'c-is-active': selectedColor === color }"
                   class="pointer"
-                  @click="selectColor = color"
+                  @click="selectedColor = color"
                 />
               </el-col>
             </el-row>
@@ -65,10 +97,10 @@
                   class="c-bg-secondary-light text-white text-center py-2 pointer w-100"
                   :style="{ 'font-family': fontFamily.name }"
                   :class="{
-                    'c-is-active': selectFontFamily === fontFamily.name,
-                    'c-not-active': selectFontFamily !== fontFamily.name,
+                    'c-is-active': selectedFontFamily === fontFamily.name,
+                    'c-not-active': selectedFontFamily !== fontFamily.name,
                   }"
-                  @click="selectFontFamily = fontFamily.name"
+                  @click="selectedFontFamily = fontFamily.name"
                 >
                   {{ fontFamily.label }}
                 </div>
@@ -76,6 +108,29 @@
             </el-row>
           </div>
           <!-- 字体选择结束 -->
+          <!-- 字体大小调整 -->
+          <div class="px-3 py-3 w-100 c-bg-secondary">
+            <el-text class="text-white" size="small">Font Size</el-text>
+            <el-row class="mt-2" :gutter="10">
+              <el-col :span="12">
+                <el-button
+                  class="w-100 bg-transparent border-secondary"
+                  @click="textScale += 0.1"
+                  >+</el-button
+                >
+              </el-col>
+              <el-col :span="12">
+                <el-button
+                  class="w-100 bg-transparent border-secondary"
+                  @click="
+                    textScale = textScale > 0.2 ? textScale - 0.1 : textScale
+                  "
+                  >-</el-button
+                >
+              </el-col>
+            </el-row>
+          </div>
+          <!-- 字体大小调整结束 -->
         </div>
         <!-- Caption END -->
         <!-- Stickers -->
@@ -146,9 +201,10 @@
           <el-row class="pt-5">
             <el-button
               class="w-100 c-btn-bg-cold border-0 text-white fw-bold"
-              @click="handleFile('download')"
-              >download</el-button
+              @click="handleDownload"
             >
+              download
+            </el-button>
           </el-row>
           <!--          <el-row>-->
           <!--            <el-button-->
@@ -166,26 +222,37 @@
 </template>
 
 <script setup lang="ts">
-import { fabric } from 'fabric'
-import { fabricGif } from '@/utils/gif.fabric'
+import GifRender from '@/components/gif-render.vue'
+import FrameRender from '@/components/frame-render.vue'
 import { getFileDetails, getFilesList, getStickerTags } from '@/api/file'
+import { headTrack } from '@/api/creation'
 import { useRoute } from 'vue-router'
-import { useUploadFileStore } from '@/stores'
-import router from '@/router'
-import { memeFabric } from '@/utils/style.fabric'
 import { ClickOutside as vClickOutside } from 'element-plus'
+import { generateRandomString } from '@/utils/common'
+import { useUploadFileStore } from '@/stores'
+import { gifToSprites } from '@/utils/gif.utils'
 
 // global variable
-const op = ref<string>('Caption')
 const uploadFileStore = useUploadFileStore()
+const op = ref<string>('Stickers')
+const renderMethod = ref<string>('frame')
+const sourceImageCanvasBox = ref<HTMLElement>()
+const sourceImageInfo = ref<object>({
+  fid: null,
+  url: '',
+  width: 0,
+  height: 0,
+  file: undefined,
+})
+const boxWidth = ref<number>()
+const trackResults = ref<Object>()
+const trackLoading = ref<boolean>(false)
 
 // 1. 添加文本
-let sourceImageCanvas: fabric.Canvas
-const sourceImageCanvasBox = ref<HTMLElement>()
-const sourceImageInfo = ref<object>({ fid: null, url: '', width: 0, height: 0 })
 const text = ref<string>('')
-const selectColor = ref<string>('black')
-const selectFontFamily = ref<string>('Arial')
+const textScale = ref<number>(1)
+const selectedColor = ref<string>('black')
+const selectedFontFamily = ref<string>('Arial')
 
 const colors = ref<string[]>([
   'white',
@@ -225,108 +292,60 @@ const fontFamilies = ref<object[]>([
   },
 ])
 
-const fabricShadow = new fabric.Shadow({
-  color: 'rgb(200, 200, 200)',
-  offsetX: 1,
-  offsetY: 1,
-  blur: 1,
-})
+const getFileInfo = () => {
+  const fid = useRoute().params.id
+  const data = new FormData()
 
-const init = () => {
-  sourceImageCanvas = new fabric.Canvas('source-image-canvas')
-  getFileDetails({ fid: useRoute().params.id }).then((res) => {
-    const file_info = res.data.media.src
+  trackLoading.value = true
+  try {
+    if (fid) {
+      getFileDetails({ fid }).then((res) => {
+        const file_info = res.data.media.src
 
-    sourceImageInfo.value.url = file_info.url
-    sourceImageInfo.value.width = file_info.dims[0]
-    sourceImageInfo.value.height = file_info.dims[1]
-    gifRenderer()
-  })
+        sourceImageInfo.value.fid = res.data.fid
+        sourceImageInfo.value.url = file_info.url
+        sourceImageInfo.value.width = file_info.dims[0]
+        sourceImageInfo.value.height = file_info.dims[1]
+        sourceImageInfo.value.file = file_info.url
+
+        data.append('fid', fid as string)
+        handleHeadTrack(data)
+      })
+    } else {
+      let uploadFile = undefined
+      let uploadFileUrl = uploadFileStore.url
+        ? uploadFileStore.url
+        : URL.createObjectURL(uploadFileStore.file['raw'])
+      uploadFile = uploadFileStore.url
+        ? uploadFileStore.file
+        : uploadFileStore.file['raw']
+      gifToSprites(uploadFile).then((gif) => {
+        sourceImageInfo.value.url = uploadFileUrl
+        sourceImageInfo.value.width = gif.originalWidth
+        sourceImageInfo.value.height = gif.originalHeight
+        sourceImageInfo.value.file = uploadFile
+
+        data.append('file', uploadFile)
+        handleHeadTrack(data)
+      })
+    }
+  } catch (e) {
+    console.log(e.message)
+  }
 }
 
-const gifRenderer = () => {
-  const canvasBoxWidth = sourceImageCanvasBox.value.$el.clientWidth
-  const gifPromise = fabricGif(sourceImageInfo.value.url, canvasBoxWidth)
-
-  gifPromise.then((gif) => {
-    sourceImageCanvas.setDimensions({
-      width: gif.image.width,
-      height: gif.image.height,
+const handleHeadTrack = (data: FormData) => {
+  headTrack(data).then((res) => {
+    const data = {}
+    Object.keys(res.data).forEach((id) => {
+      data[id] = {
+        stickerId: '',
+        stickerStyle: undefined,
+        boxes: res.data[id],
+      }
     })
-    gif.image.set({
-      top: 0,
-      left: 0,
-      selectable: false,
-      hoverCursor: 'auto',
-    })
-    sourceImageCanvas.add(gif.image)
-    fabric.util.requestAnimFrame(function render() {
-      sourceImageCanvas.renderAll()
-      fabric.util.requestAnimFrame(render)
-    })
-  })
-}
-
-const handleInput = () => {
-  const fabricText = sourceImageCanvas
-    .getObjects()
-    .find((obj) => obj['id'] === 'text')
-  if (!fabricText) addText()
-}
-
-const addText = () => {
-  const fabricText = new fabric.Text(text.value, {
-    id: 'text',
-    left: 0,
-    top: 0,
-    fontFamily: selectFontFamily.value,
-    fontSize: 16,
-    fill: selectColor.value,
-    strokeWidth: 3,
-    charSpacing: 36,
-    shadow: fabricShadow,
-    borderColor: 'rgb(255, 255, 255)',
-    borderDashArray: [5, 2],
-    cornerColor: 'rgb(255, 255, 255)',
-  })
-  const canvasBoxWidth = sourceImageCanvasBox.value.$el.clientWidth
-  const scale = canvasBoxWidth / sourceImageInfo.value.width
-
-  fabricText.fontSize = fabricText.fontSize * scale
-  new memeFabric().addDeleteControl(fabricText, sourceImageCanvas, () => {
-    sourceImageCanvas.remove(fabricText)
-  })
-
-  fabricText.on('mouseover', () => {
-    sourceImageCanvas.setActiveObject(fabricText)
-    fabricText.set({
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    })
-    sourceImageCanvas.renderAll()
-  })
-
-  fabricText.on('mouseout', () => {
-    sourceImageCanvas.discardActiveObject()
-    fabricText.set({
-      backgroundColor: 'transparent',
-    })
-    sourceImageCanvas.renderAll()
-  })
-
-  sourceImageCanvas.add(fabricText)
-  handleTextOptionChange(fabricText)
-}
-
-// 监听文本样式选项改变
-const handleTextOptionChange = (fabricText) => {
-  watch(text, (newValue) => {
-    fabricText.set('text', newValue)
-  })
-  watch(selectFontFamily, (newValue) => {
-    fabricText.setOptions({ fontFamily: newValue })
-  })
-  watch(selectColor, (newValue) => {
-    fabricText.setOptions({ fill: newValue })
+    trackResults.value = data
+    trackLoading.value = false
   })
 }
 
@@ -341,7 +360,6 @@ const stickersTags = ref<object[]>([
 
 const selectedTag = ref('all')
 const stickers = ref<object[]>([])
-const stickersOnCanvas = ref<fabric.Image[]>([])
 const selectedStickerUrl = ref<string>()
 
 const getOptionalTags = () => {
@@ -373,94 +391,34 @@ const getStickers = () => {
 }
 
 const handleStickerSelect = (event) => {
-  selectedStickerUrl.value = event.target.src
-  addSticker()
+  selectedStickerUrl.value = event.target.src + '#' + generateRandomString(4)
 }
 
-const addSticker = () => {
-  fabric.Image.fromURL(
-    selectedStickerUrl.value!,
-    (img) => {
-      img.set({
-        left: 0,
-        top: 0,
-        selectable: true,
-      })
-      img.scaleToWidth(120)
+// 3. 操作按钮点击事件
+const handleDownload = () => {
+  const url = new URL(sourceImageInfo.value.url)
+  const baseUrl = `${url.protocol}//${url.host}${url.pathname}`
 
-      new memeFabric().addDeleteControl(
-        img,
-        sourceImageCanvas,
-        (eventData, transform) => {
-          let target = transform.target
-          stickersOnCanvas.value.splice(stickersOnCanvas.value.indexOf(target))
-          sourceImageCanvas.remove(target)
-        }
-      )
-
-      img.on('mouseover', () => {
-        sourceImageCanvas.setActiveObject(img)
-        sourceImageCanvas.renderAll()
-      })
-
-      img.on('mouseout', () => {
-        sourceImageCanvas.discardActiveObject()
-        sourceImageCanvas.renderAll()
-      })
-
-      sourceImageCanvas.add(img)
-      stickersOnCanvas.value.push(img)
-    },
-    { crossOrigin: '' }
-  )
+  if (renderMethod.value === 'gif') {
+    sourceImageInfo.value.url =
+      baseUrl + '?op=download' + '#' + generateRandomString(4)
+  } else if (renderMethod.value === 'frame') {
+    sourceImageInfo.value.url =
+      baseUrl + '?op=fusion' + '#' + generateRandomString(4)
+  } else {
+    console.error('Unknown render method')
+  }
 }
 
-// 3. 将canvas转为gif
-const handleFile = (op) => {
-  const fabricText = sourceImageCanvas
-    .getObjects()
-    .find((obj) => obj['id'] === 'text')
-
-  const link = document.createElement('a')
-  const canvasBoxWidth = sourceImageCanvasBox.value.$el.clientWidth
-  const scale = canvasBoxWidth / sourceImageInfo.value.width
-
-  fabricGif(sourceImageInfo.value.url).then((gif) => {
-    const tempFabricImages = []
-    stickersOnCanvas.value.forEach((item) => {
-      const tempFabricImage = fabric.util.object.clone(item)
-      tempFabricImage.left = item.left / scale
-      tempFabricImage.top = item.top / scale
-      tempFabricImage.scaleToWidth(item.getBoundingRect().width / scale)
-      tempFabricImage.scaleToHeight(item.getBoundingRect().height / scale)
-      tempFabricImages.push(tempFabricImage)
-    })
-    if (fabricText) {
-      const tempFabricText = fabric.util.object.clone(fabricText)
-      tempFabricText.left = fabricText.left / scale
-      tempFabricText.top = fabricText.top / scale
-      tempFabricText.fontSize = fabricText['fontSize'] / scale
-      tempFabricImages.push(tempFabricText)
-    }
-    gif.gifRenderer(tempFabricImages).then((res) => {
-      if (op === 'download') {
-        link.href = res['url']
-        link.download = 'memefun.gif'
-        link.click()
-      } else if (op === 'upload') {
-        uploadFileStore.updateUploadFile('', res['url'], res['file'])
-        router.push({
-          name: 'finalize',
-        })
-      } else {
-        console.log('error')
-      }
-    })
-  })
+const handleFusion = (result) => {
+  sourceImageInfo.value.url = result.url
+  sourceImageInfo.value.file = result.file
+  renderMethod.value = 'gif'
 }
 
 onMounted(() => {
-  init()
+  boxWidth.value = sourceImageCanvasBox.value.$el.clientWidth
+  getFileInfo()
   getOptionalTags()
   getStickers()
 })

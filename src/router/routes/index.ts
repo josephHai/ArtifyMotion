@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    name: 'ArtifyMotion',
+    name: '',
     component: () => import('@/views/artifyMotion/index.vue'),
     children: [
       {
@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/artifyMotion/list.vue'),
       },
       {
-        path: 'upload',
+        path: 'upload/:behavior?',
         component: () => import('@/views/artifyMotion/upload/index.vue'),
         children: [
           {
@@ -43,14 +43,9 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
-        path: 'create/replace/:id',
-        name: 'replace',
-        component: () => import('@/views/artifyMotion/creation.vue'),
-      },
-      {
-        path: 'create/edit/:id',
-        name: 'edit',
-        component: () => import('@/views/artifyMotion/edit.vue'),
+        path: 'creation/:id?',
+        name: 'creation',
+        component: () => import('@/views/artifyMotion/creation/index.vue'),
       },
     ],
   },

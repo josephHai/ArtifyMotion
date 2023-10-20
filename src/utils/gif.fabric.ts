@@ -6,6 +6,7 @@ import { ParsedFrame } from 'gifuct-js'
 import { ElMessage } from 'element-plus'
 
 const [PLAY, PAUSE, STOP] = [0, 1, 2]
+let curFramesIndex = 0
 
 export async function fabricGif(
   gif: string | File,
@@ -23,6 +24,7 @@ export async function fabricGif(
     totalFrames,
   } = await gifToSprites(gif, maxWidth, maxHeight)
 
+  const delay = frames[0].delay
   const frameCanvas = document.createElement('canvas')
   frameCanvas.width = frameWidth
   frameCanvas.height = frameHeight
@@ -66,6 +68,8 @@ export async function fabricGif(
         }
 
         const spriteIndex = Math.floor(framesIndex / framesPerSprite)
+
+        curFramesIndex = framesIndex
         ctx.drawImage(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           sprites[spriteIndex]!,
@@ -102,8 +106,12 @@ export async function fabricGif(
          *
          * @return gifUrl: string
          * @param modifiedContent
+         * @param isFrame boolean
          */
-        gifRenderer: (modifiedContent: fabric.Object[]): Promise<object> => {
+        gifRenderer: (
+          modifiedContent: fabric.Object[] | fabric.Object[][],
+          isFrame?: boolean
+        ): Promise<object> => {
           const gifCanvas = document.createElement('canvas')
           gifCanvas.width = frameWidth
           gifCanvas.height = frameHeight
@@ -133,11 +141,12 @@ export async function fabricGif(
               gifCanvas.remove()
             })
 
-            gifEncoder.on('progress', () => {
-              // console.log(p)
+            gifEncoder.on('progress', (p) => {
+              console.log(p)
             })
 
             let previousFrame: ParsedFrame | undefined
+            let curFrameIndex = 0
             for (const frame of frames) {
               const frameImageData = new ImageData(
                 frame.patch,
@@ -151,9 +160,17 @@ export async function fabricGif(
               }
 
               frameCtx.putImageData(frameImageData, 0, 0)
-              modifiedContent.forEach((item) => {
-                item.render(frameCtx)
-              })
+              if (isFrame) {
+                modifiedContent = modifiedContent as fabric.Object[][]
+                modifiedContent[curFrameIndex].forEach((item) => {
+                  item.render(frameCtx)
+                })
+              } else {
+                modifiedContent = modifiedContent as fabric.Object[]
+                modifiedContent.forEach((item) => {
+                  item.render(frameCtx)
+                })
+              }
 
               gifCtx.drawImage(frameCanvas, 0, 0)
               gifEncoder.addFrame(gifCtx, {
@@ -163,6 +180,7 @@ export async function fabricGif(
               })
 
               previousFrame = frame
+              curFrameIndex++
             }
             gifEncoder.render()
           })
@@ -185,43 +203,79 @@ export async function fabricGif(
 
           ctx.clearRect(0, 0, originalWidth, originalHeight)
 
-          for (let i = 0; i <= frameIndex; i++) {
-            if (i > 0 && frames[i - 1]?.disposalType === 2) {
-              ctx.clearRect(
-                frames[i - 1].dims.left,
-                frames[i - 1].dims.top,
-                frameWidth,
-                frameHeight
-              )
-            }
-            try {
-              const frameImageData = new ImageData(
-                frames[i].patch,
-                originalWidth,
-                originalHeight
-              )
-              frameCtx.putImageData(frameImageData, 0, 0)
-              ctx.drawImage(
-                frameCanvas,
-                0,
-                0,
-                originalWidth,
-                originalHeight,
-                0,
-                0,
-                frameWidth,
-                frameHeight
-              )
-            } catch (DOMException) {
-              ElMessage({
-                message:
-                  'There was an error parsing the animated image. Please choose another image.',
-                type: 'error',
-                duration: 3 * 1000,
-              })
-              return
-            }
+          if (frameIndex > 0 && frames[frameIndex - 1]?.disposalType === 2) {
+            ctx.clearRect(
+              frames[frameIndex - 1].dims.left,
+              frames[frameIndex - 1].dims.top,
+              frameWidth,
+              frameHeight
+            )
           }
+          try {
+            const frameImageData = new ImageData(
+              frames[frameIndex].patch,
+              originalWidth,
+              originalHeight
+            )
+            frameCtx.putImageData(frameImageData, 0, 0)
+            ctx.drawImage(
+              frameCanvas,
+              0,
+              0,
+              originalWidth,
+              originalHeight,
+              0,
+              0,
+              frameWidth,
+              frameHeight
+            )
+          } catch (DOMException) {
+            ElMessage({
+              message:
+                'There was an error parsing the animated image. Please choose another image.',
+              type: 'error',
+              duration: 3 * 1000,
+            })
+            return
+          }
+
+          // for (let i = 0; i <= frameIndex; i++) {
+          //   if (i > 0 && frames[i - 1]?.disposalType === 2) {
+          //     ctx.clearRect(
+          //       frames[i - 1].dims.left,
+          //       frames[i - 1].dims.top,
+          //       frameWidth,
+          //       frameHeight
+          //     )
+          //   }
+          //   try {
+          //     const frameImageData = new ImageData(
+          //       frames[i].patch,
+          //       originalWidth,
+          //       originalHeight
+          //     )
+          //     frameCtx.putImageData(frameImageData, 0, 0)
+          //     ctx.drawImage(
+          //       frameCanvas,
+          //       0,
+          //       0,
+          //       originalWidth,
+          //       originalHeight,
+          //       0,
+          //       0,
+          //       frameWidth,
+          //       frameHeight
+          //     )
+          //   } catch (DOMException) {
+          //     ElMessage({
+          //       message:
+          //         'There was an error parsing the animated image. Please choose another image.',
+          //       type: 'error',
+          //       duration: 3 * 1000,
+          //     })
+          //     return
+          //   }
+          // }
         },
       }
 
@@ -233,7 +287,12 @@ export async function fabricGif(
         originalWidth,
         originalHeight,
         totalFrames,
+        delay,
       })
     })
   })
+}
+
+export function getCurFramesIndex() {
+  return curFramesIndex
 }

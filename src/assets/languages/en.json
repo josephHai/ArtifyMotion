@@ -2,7 +2,8 @@
   "message": {
     "home": "Home",
     "upload": "Upload",
-    "locale": "en"
+    "locale": "en",
+    "creation": "Creation"
   },
   "tips": {
     "input": "Please input"

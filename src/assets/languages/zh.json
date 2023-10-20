@@ -2,7 +2,8 @@
   "message": {
     "home": "首页",
     "upload": "上 传",
-    "locale": "中文"
+    "locale": "中文",
+    "creation": "创作"
   },
   "tips": {
     "input": "请输入"

@@ -3,7 +3,6 @@ import { fabric } from 'fabric'
 import GIF from 'gif.js'
 import gifWorkerScript from '@/utils/gif.worker.js?url'
 import { ParsedFrame } from 'gifuct-js'
-import { ElMessage } from 'element-plus'
 
 const [PLAY, PAUSE, STOP] = [0, 1, 2]
 let curFramesIndex = 0
@@ -122,6 +121,12 @@ export async function fabricGif(
           frameCanvas.height = frameHeight
           const frameCtx = frameCanvas.getContext('2d')!
 
+          // 存储未渲染sticker的gifCanvas
+          const tempCanvas = document.createElement('canvas')
+          tempCanvas.width = frameWidth
+          tempCanvas.height = frameHeight
+          const tempCtx = tempCanvas.getContext('2d')!
+
           const gifEncoder = new GIF({
             workers: 4,
             quality: 30,
@@ -141,8 +146,8 @@ export async function fabricGif(
               gifCanvas.remove()
             })
 
-            gifEncoder.on('progress', (p) => {
-              console.log(p)
+            gifEncoder.on('progress', () => {
+              // console.log(p)
             })
 
             let previousFrame: ParsedFrame | undefined
@@ -156,10 +161,11 @@ export async function fabricGif(
 
               if (previousFrame && previousFrame.disposalType === 2) {
                 const { width, height, left, top } = previousFrame.dims
-                gifCtx.clearRect(left, top, width, height)
+                tempCtx.clearRect(left, top, width, height)
               }
 
               frameCtx.putImageData(frameImageData, 0, 0)
+              tempCtx.drawImage(frameCanvas, 0, 0)
               if (isFrame) {
                 modifiedContent = modifiedContent as fabric.Object[][]
                 modifiedContent[curFrameIndex].forEach((item) => {
@@ -173,109 +179,25 @@ export async function fabricGif(
               }
 
               gifCtx.drawImage(frameCanvas, 0, 0)
+
               gifEncoder.addFrame(gifCtx, {
                 delay: frame.delay,
                 copy: true,
                 dispose: frame.disposalType,
               })
 
+              if (previousFrame) {
+                const { width, height, left, top } = previousFrame.dims
+                gifCtx.clearRect(left, top, width, height)
+                gifCtx.drawImage(tempCanvas, 0, 0)
+              }
+
               previousFrame = frame
               curFrameIndex++
+              tempCanvas.remove()
             }
             gifEncoder.render()
           })
-        },
-        /**
-         * perFrameRenderer 渲染gif中的某一帧至canvas中
-         *
-         * @param frameIndex number 帧数
-         * @param canvas HtmlCanvasElement 画布对象
-         */
-        perFrameRenderer: (frameIndex: number, canvas: HTMLCanvasElement) => {
-          const frameCanvas = document.createElement('canvas')
-          const frameCtx = frameCanvas.getContext('2d')!
-          frameCanvas.width = originalWidth
-          frameCanvas.height = originalHeight
-
-          const ctx = canvas.getContext('2d')!
-          canvas.width = frameWidth
-          canvas.height = frameHeight
-
-          ctx.clearRect(0, 0, originalWidth, originalHeight)
-
-          if (frameIndex > 0 && frames[frameIndex - 1]?.disposalType === 2) {
-            ctx.clearRect(
-              frames[frameIndex - 1].dims.left,
-              frames[frameIndex - 1].dims.top,
-              frameWidth,
-              frameHeight
-            )
-          }
-          try {
-            const frameImageData = new ImageData(
-              frames[frameIndex].patch,
-              originalWidth,
-              originalHeight
-            )
-            frameCtx.putImageData(frameImageData, 0, 0)
-            ctx.drawImage(
-              frameCanvas,
-              0,
-              0,
-              originalWidth,
-              originalHeight,
-              0,
-              0,
-              frameWidth,
-              frameHeight
-            )
-          } catch (DOMException) {
-            ElMessage({
-              message:
-                'There was an error parsing the animated image. Please choose another image.',
-              type: 'error',
-              duration: 3 * 1000,
-            })
-            return
-          }
-
-          // for (let i = 0; i <= frameIndex; i++) {
-          //   if (i > 0 && frames[i - 1]?.disposalType === 2) {
-          //     ctx.clearRect(
-          //       frames[i - 1].dims.left,
-          //       frames[i - 1].dims.top,
-          //       frameWidth,
-          //       frameHeight
-          //     )
-          //   }
-          //   try {
-          //     const frameImageData = new ImageData(
-          //       frames[i].patch,
-          //       originalWidth,
-          //       originalHeight
-          //     )
-          //     frameCtx.putImageData(frameImageData, 0, 0)
-          //     ctx.drawImage(
-          //       frameCanvas,
-          //       0,
-          //       0,
-          //       originalWidth,
-          //       originalHeight,
-          //       0,
-          //       0,
-          //       frameWidth,
-          //       frameHeight
-          //     )
-          //   } catch (DOMException) {
-          //     ElMessage({
-          //       message:
-          //         'There was an error parsing the animated image. Please choose another image.',
-          //       type: 'error',
-          //       duration: 3 * 1000,
-          //     })
-          //     return
-          //   }
-          // }
         },
       }
 

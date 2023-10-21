@@ -85,17 +85,17 @@ const gifRender = () => {
 
 // 文本操作相关
 const fabricShadow = new fabric.Shadow({
-  color: 'rgb(200, 200, 200)',
+  color: 'rgb(233, 233, 233)',
   offsetX: 1,
   offsetY: 1,
   blur: 1,
 })
 const fabricText = new fabric.Text(<string>props.text, {
   id: 'text',
-  left: 0,
-  top: 0,
+  left: props.sourceImageInfo?.width / 2,
+  top: props.sourceImageInfo?.height / 2,
   fontFamily: props.selectedFontFamily,
-  fontSize: 16,
+  fontSize: 24,
   fill: props.selectedColor,
   strokeWidth: 3,
   charSpacing: 36,

@@ -3,6 +3,7 @@ import { fabric } from 'fabric'
 import GIF from 'gif.js'
 import gifWorkerScript from '@/utils/gif.worker.js?url'
 import { ParsedFrame } from 'gifuct-js'
+import { ElLoading } from 'element-plus'
 
 const [PLAY, PAUSE, STOP] = [0, 1, 2]
 let curFramesIndex = 0
@@ -129,14 +130,22 @@ export async function fabricGif(
 
           const gifEncoder = new GIF({
             workers: 4,
-            quality: 30,
+            quality: 1,
             workerScript: gifWorkerScript,
             width: frameWidth,
             height: frameHeight,
           })
 
           return new Promise((resolve) => {
+            const options = {
+              fullscreen: true,
+              lock: true,
+              text: 'generating...',
+              background: 'rgba(88, 88, 88, 0.8)',
+            }
+            const loadingInstance = ElLoading.service(options)
             gifEncoder.on('finished', (blob) => {
+              loadingInstance.close()
               resolve({
                 url: URL.createObjectURL(blob),
                 file: new File([blob], 'memefun', {

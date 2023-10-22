@@ -318,7 +318,8 @@ const addSticker = (
   sticker: fabric.Image,
   stickerStyle: stickerStyle
 ) => {
-  sourceImageCanvas.add(stickerModify(item, sticker, stickerStyle, true))
+  const newSticker = stickerModify(item, sticker, stickerStyle, true)
+  if (newSticker) sourceImageCanvas.add(newSticker)
 }
 
 const stickerModify = (

@@ -15,27 +15,45 @@
       <!-- 大小位置调整 -->
       <el-col :span="16">
         <el-row :gutter="10">
-          <el-col :span="6">
+          <el-col :span="4">
             <el-button
               class="w-100 bg-transparent border-secondary"
               @click="handleOpClick('+')"
               ><icon-search-plus width="16" height="16"
             /></el-button>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="4">
             <el-button
               class="w-100 bg-transparent border-secondary"
               @click="handleOpClick('-')"
               ><icon-search-minus width="16" height="16"
             /></el-button>
           </el-col>
-          <el-col :span="10">
+          <el-col :span="8">
             <el-button
               class="w-100 bg-transparent border border-secondary"
               @click="showPositionOptions = !showPositionOptions"
               text
               ><icon-switch width="16" height="16" />
               &nbsp;Position
+            </el-button>
+          </el-col>
+          <el-col :span="8">
+            <el-button
+              class="w-100 bg-transparent border border-secondary"
+              text
+            >
+              <el-col :span="16" class="text-white">
+                <div>{{ playSpeed }}x</div>
+              </el-col>
+              <el-col :span="8">
+                <div style="margin-bottom: -4px">
+                  <i-ep-caret-top @click="changeSpeed('+')" />
+                </div>
+                <div>
+                  <i-ep-caret-bottom @click="changeSpeed('-')" />
+                </div>
+              </el-col>
             </el-button>
           </el-col>
         </el-row>
@@ -159,6 +177,7 @@ const props = defineProps({
 const emits = defineEmits(['fusion'])
 const uploadFileStore = useUploadFileStore()
 const showPositionOptions = ref<boolean>(false)
+const playSpeed = ref<number>(1)
 
 interface FaceBox {
   id: string
@@ -221,7 +240,7 @@ const framesRender = () => {
         }
       })
       curFramesIndex = (curFramesIndex + 1) % gif.totalFrames
-      await sleep(gif.delay)
+      await sleep(gif.delay / playSpeed.value)
       fabric.util.requestAnimFrame(animate)
     }
     animate()
@@ -383,6 +402,14 @@ const handleOpClick = (op) => {
     item.flip = !item.flip
   } else {
     console.error('unknown operation')
+  }
+}
+
+const changeSpeed = (op) => {
+  if (op === '+' && playSpeed.value < 2) {
+    playSpeed.value = parseFloat((playSpeed.value + 0.1).toFixed(1))
+  } else if (op === '-' && playSpeed.value > 0.1) {
+    playSpeed.value = parseFloat((playSpeed.value - 0.1).toFixed(1))
   }
 }
 

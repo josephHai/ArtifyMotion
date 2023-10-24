@@ -429,7 +429,7 @@ const convertGif = (op: string) => {
           item.boxes[curFrameIndex],
           stickerBoxes[item.stickerId],
           item.stickerStyle
-        ).clone((newSticker) => {
+        )?.clone((newSticker) => {
           tempStickers[curFrameIndex].push(newSticker)
         })
       }

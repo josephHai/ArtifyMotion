@@ -2,11 +2,9 @@ import { gifToSprites } from '@/utils/gif.utils'
 import { fabric } from 'fabric'
 import GIF from 'gif.js'
 import gifWorkerScript from '@/utils/gif.worker.js?url'
-import { ParsedFrame } from 'gifuct-js'
 import { ElLoading } from 'element-plus'
 
 const [PLAY, PAUSE, STOP] = [0, 1, 2]
-let curFramesIndex = 0
 
 export async function fabricGif(
   gif: string | File,
@@ -25,6 +23,104 @@ export async function fabricGif(
   } = await gifToSprites(gif, maxWidth, maxHeight)
 
   const delay = frames[0].delay
+  const frameRenderer = (framesIndex: number) => {
+    const img = document.createElement('img')
+    const image = new fabric.Image(img)
+    image.width = frameWidth
+    image.height = frameHeight
+    image.set({
+      top: 0,
+      left: 0,
+      selectable: false,
+      hoverCursor: 'auto',
+    })
+    image._render = (ctx) => {
+      const spriteIndex = Math.floor(framesIndex / framesPerSprite)
+
+      ctx.drawImage(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        sprites[spriteIndex]!,
+        frameWidth * (framesIndex % framesPerSprite),
+        0,
+        frameWidth,
+        frameHeight,
+        -frameWidth / 2,
+        -frameHeight / 2,
+        frameWidth,
+        frameHeight
+      )
+    }
+    return image
+  }
+
+  /**
+   * mergeFramesToGif 将帧合并成gif
+   *
+   * 声明两个Canvas的原因：ctx.putImageData方法会覆盖画布之前的内容，导致像素缺失
+   * （像素缺失的原因参考 gif optimization）
+   *
+   * @param modifiedContent
+   * @return gifUrl: string
+   */
+  const mergeFramesToGif = (
+    modifiedContent: fabric.Object[] | fabric.Object[][]
+  ) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = frameWidth
+    canvas.height = frameHeight
+    const ctx = canvas.getContext('2d')!
+    const gifEncoder = new GIF({
+      workers: 4,
+      quality: 10,
+      workerScript: gifWorkerScript,
+      width: canvas.width,
+      height: canvas.height,
+    })
+    return new Promise((resolve) => {
+      const options = {
+        fullscreen: true,
+        lock: true,
+        text: 'generating...',
+        background: 'rgba(88, 88, 88, 0.8)',
+      }
+      const loadingInstance = ElLoading.service(options)
+      gifEncoder.on('finished', (blob) => {
+        loadingInstance.close()
+        resolve({
+          url: URL.createObjectURL(blob),
+          file: new File([blob], 'memefun', {
+            type: blob.type,
+          }),
+        })
+        canvas.remove()
+      })
+
+      gifEncoder.on('progress', () => {
+        // console.log(p)
+      })
+      for (let framesIndex = 0; framesIndex < totalFrames; framesIndex++) {
+        frameRenderer(framesIndex).render(ctx)
+        if (Array.isArray(modifiedContent[0])) {
+          modifiedContent = modifiedContent as fabric.Object[][]
+          modifiedContent[framesIndex].forEach((item) => {
+            item.render(ctx)
+          })
+        } else {
+          modifiedContent = modifiedContent as fabric.Object[]
+          modifiedContent.forEach((item) => {
+            item.render(ctx)
+          })
+        }
+        gifEncoder.addFrame(ctx, {
+          delay: delay,
+          copy: true,
+          dispose: frames[framesIndex].disposalType,
+        })
+      }
+      gifEncoder.render()
+    })
+  }
+
   const frameCanvas = document.createElement('canvas')
   frameCanvas.width = frameWidth
   frameCanvas.height = frameHeight
@@ -69,7 +165,6 @@ export async function fabricGif(
 
         const spriteIndex = Math.floor(framesIndex / framesPerSprite)
 
-        curFramesIndex = framesIndex
         ctx.drawImage(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           sprites[spriteIndex]!,
@@ -98,116 +193,8 @@ export async function fabricGif(
           image.dirty = false
         },
         getStatus: () => ['Playing', 'Paused', 'Stopped'][status],
-        /**
-         * gifRenderer 将gifuct-js提取的帧合并成gif
-         *
-         * 声明两个Canvas的原因：ctx.putImageData方法会覆盖画布之前的内容，导致像素缺失
-         * （像素缺失的原因参考 gif optimization）
-         *
-         * @return gifUrl: string
-         * @param modifiedContent
-         * @param isFrame boolean
-         */
-        gifRenderer: (
-          modifiedContent: fabric.Object[] | fabric.Object[][],
-          isFrame?: boolean
-        ): Promise<object> => {
-          const gifCanvas = document.createElement('canvas')
-          gifCanvas.width = frameWidth
-          gifCanvas.height = frameHeight
-          const gifCtx = gifCanvas.getContext('2d')!
-
-          const frameCanvas = document.createElement('canvas')
-          frameCanvas.width = frameWidth
-          frameCanvas.height = frameHeight
-          const frameCtx = frameCanvas.getContext('2d')!
-
-          // 存储未渲染sticker的gifCanvas
-          const tempCanvas = document.createElement('canvas')
-          tempCanvas.width = frameWidth
-          tempCanvas.height = frameHeight
-          const tempCtx = tempCanvas.getContext('2d')!
-
-          const gifEncoder = new GIF({
-            workers: 4,
-            quality: 1,
-            workerScript: gifWorkerScript,
-            width: frameWidth,
-            height: frameHeight,
-          })
-
-          return new Promise((resolve) => {
-            const options = {
-              fullscreen: true,
-              lock: true,
-              text: 'generating...',
-              background: 'rgba(88, 88, 88, 0.8)',
-            }
-            const loadingInstance = ElLoading.service(options)
-            gifEncoder.on('finished', (blob) => {
-              loadingInstance.close()
-              resolve({
-                url: URL.createObjectURL(blob),
-                file: new File([blob], 'memefun', {
-                  type: blob.type,
-                }),
-              })
-              gifCanvas.remove()
-            })
-
-            gifEncoder.on('progress', () => {
-              // console.log(p)
-            })
-
-            let previousFrame: ParsedFrame | undefined
-            let curFrameIndex = 0
-            for (const frame of frames) {
-              const frameImageData = new ImageData(
-                frame.patch,
-                frame.dims.width,
-                frame.dims.height
-              )
-
-              if (previousFrame && previousFrame.disposalType === 2) {
-                const { width, height, left, top } = previousFrame.dims
-                tempCtx.clearRect(left, top, width, height)
-              }
-
-              frameCtx.putImageData(frameImageData, 0, 0)
-              tempCtx.drawImage(frameCanvas, 0, 0)
-              if (isFrame) {
-                modifiedContent = modifiedContent as fabric.Object[][]
-                modifiedContent[curFrameIndex].forEach((item) => {
-                  item.render(frameCtx)
-                })
-              } else {
-                modifiedContent = modifiedContent as fabric.Object[]
-                modifiedContent.forEach((item) => {
-                  item.render(frameCtx)
-                })
-              }
-
-              gifCtx.drawImage(frameCanvas, 0, 0)
-
-              gifEncoder.addFrame(gifCtx, {
-                delay: frame.delay,
-                copy: true,
-                dispose: frame.disposalType,
-              })
-
-              if (previousFrame) {
-                const { width, height, left, top } = previousFrame.dims
-                gifCtx.clearRect(left, top, width, height)
-                gifCtx.drawImage(tempCanvas, 0, 0)
-              }
-
-              previousFrame = frame
-              curFrameIndex++
-              tempCanvas.remove()
-            }
-            gifEncoder.render()
-          })
-        },
+        frameRenderer,
+        mergeFramesToGif,
       }
 
       methods.play()
@@ -222,8 +209,4 @@ export async function fabricGif(
       })
     })
   })
-}
-
-export function getCurFramesIndex() {
-  return curFramesIndex
 }

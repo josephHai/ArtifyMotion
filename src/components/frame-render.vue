@@ -119,7 +119,7 @@
 
 <script setup lang="ts">
 import { fabric } from 'fabric'
-import { fabricGif, getCurFramesIndex } from '@/utils/gif.fabric'
+import { fabricGif } from '@/utils/gif.fabric'
 import { generateRandomString } from '@/utils/common'
 import {
   IconEdit,
@@ -130,6 +130,7 @@ import {
 } from '@/assets/icon'
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
+import { sleep } from '@bassist/utils'
 
 const props = defineProps({
   boxWidth: {
@@ -180,11 +181,10 @@ interface stickerStyle {
 
 // 画布对象
 let sourceImageCanvas: fabric.Canvas
-const curFrameIndex = ref<number>(0)
 const framesCount = ref<number>(0)
 const stickerBoxes = {}
 let selectedFaceId: string
-let isRunning = true
+let frameRenderInterval: number
 
 const framesRender = () => {
   sourceImageCanvas = new fabric.Canvas('source-image-canvas-frame')
@@ -198,36 +198,33 @@ const framesRender = () => {
 
   gifPromise.then((gif) => {
     framesCount.value = gif.totalFrames
-
+    let curFramesIndex = 0
     gif.image.set({
       top: 0,
       left: 0,
       selectable: false,
       hoverCursor: 'auto',
     })
-    sourceImageCanvas.add(gif.image)
-    fabric.util.requestAnimFrame(function render() {
-      canvasRefresh()
-      const result = props.trackResults
-      curFrameIndex.value = getCurFramesIndex()
-
+    const result = props.trackResults
+    const animate = async () => {
+      sourceImageCanvas.add(gif.frameRenderer(curFramesIndex))
       Object.keys(result).forEach((id) => {
         const item = result![id]
         if (Object.keys(item.boxes)) {
           item.stickerId
             ? addSticker(
-                item.boxes[curFrameIndex.value],
+                item.boxes[curFramesIndex],
                 stickerBoxes[item.stickerId],
                 item.stickerStyle
               )
-            : addRect(item.boxes[curFrameIndex.value])
+            : addRect(item.boxes[curFramesIndex])
         }
       })
-      sourceImageCanvas.renderAll()
-
-      if (isRunning) fabric.util.requestAnimFrame(render)
-      else sourceImageCanvas.dispose()
-    })
+      curFramesIndex = (curFramesIndex + 1) % gif.totalFrames
+      await sleep(gif.delay)
+      fabric.util.requestAnimFrame(animate)
+    }
+    animate()
   })
 }
 
@@ -389,18 +386,6 @@ const handleOpClick = (op) => {
   }
 }
 
-// 清除画布上的rect和sticker对象
-const canvasRefresh = () => {
-  sourceImageCanvas.getObjects().forEach((obj) => {
-    if (
-      obj['id'] &&
-      (obj['id'].includes('rect') || obj['id'].includes('sticker'))
-    ) {
-      sourceImageCanvas.remove(obj)
-    }
-  })
-}
-
 watch(
   () => props.sourceImageInfo?.url,
   () => {
@@ -436,7 +421,7 @@ const convertGif = (op: string) => {
     })
   }
   fabricGif(props.sourceImageInfo!.file!).then((gif) => {
-    gif.gifRenderer(tempStickers, true).then((result) => {
+    gif.mergeFramesToGif(tempStickers).then((result) => {
       if (op === 'fusion') emits('fusion', result)
       else if (op === 'download') {
         const link = document.createElement('a')
@@ -459,7 +444,7 @@ onMounted(() => {
   framesRender()
 })
 onUnmounted(() => {
-  isRunning = false
+  clearInterval(frameRenderInterval)
 })
 </script>
 

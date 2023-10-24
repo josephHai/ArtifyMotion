@@ -272,7 +272,7 @@ const canvasToGif = (op) => {
         tempFabricObjects.push(tempFabricText)
       }
       gif
-        .gifRenderer(tempFabricObjects)
+        .mergeFramesToGif(tempFabricObjects)
         .then((res) => {
           isBusy = false
           if (op === 'download') {

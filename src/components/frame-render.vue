@@ -202,7 +202,7 @@ interface stickerStyle {
 let sourceImageCanvas: fabric.Canvas
 const framesCount = ref<number>(0)
 const stickerBoxes = {}
-let selectedFaceId: string
+let selectedFaceId: number = 1
 let frameRenderInterval: number
 
 const framesRender = () => {
@@ -259,7 +259,7 @@ const addRect = (item: FaceBox) => {
 
   const rect = new fabric.Rect({
     id: rectId,
-    fill: item.id === selectedFaceId ? 'rgba(88, 88, 88, 0.8)' : 'transparent',
+    fill: item.id == selectedFaceId ? 'rgba(88, 88, 88, 0.8)' : 'transparent',
     stroke: 'white',
     strokeWidth: 2,
     selectable: false,
@@ -273,7 +273,7 @@ const addRect = (item: FaceBox) => {
 
   sourceImageCanvas.add(rect)
   rect.on('mousedown', () => {
-    selectedFaceId = item.id
+    selectedFaceId = item.id as number
     handleRectSelect()
     rect.set({
       fill: 'rgba(88, 88, 88, 0.8)',
@@ -296,6 +296,7 @@ watch(
   () => props.selectedStickerUrl,
   (newValue) => {
     if (newValue) {
+      if (Object.keys(props.trackResults!).length === 0) return
       const urlParts = props.selectedStickerUrl!.split('/')
       const stickerId =
         urlParts[urlParts.length - 1].split('.')[0] + selectedFaceId
@@ -371,7 +372,7 @@ const stickerModify = (
     item.height * scale + item.height * (stickerStyle.sizeRate - 1)
   )
   sticker.on('mousedown', () => {
-    selectedFaceId = item.id
+    selectedFaceId = item.id as number
   })
   sticker.flipX = stickerStyle.flip
   return sticker

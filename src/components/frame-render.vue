@@ -225,8 +225,15 @@ const framesRender = () => {
       hoverCursor: 'auto',
     })
     const result = props.trackResults
+    let previousImage: fabric.Image
     const animate = async () => {
-      sourceImageCanvas.add(gif.frameRenderer(curFramesIndex))
+      if (previousImage) {
+        sourceImageCanvas.remove(previousImage)
+      }
+      canvasRefresh()
+      let newImage = gif.frameRenderer(curFramesIndex)
+      previousImage = newImage
+      sourceImageCanvas.add(newImage)
       Object.keys(result).forEach((id) => {
         const item = result![id]
         if (Object.keys(item.boxes)) {
@@ -376,6 +383,18 @@ const stickerModify = (
   })
   sticker.flipX = stickerStyle.flip
   return sticker
+}
+
+// 清除画布上的rect和sticker对象
+const canvasRefresh = () => {
+  sourceImageCanvas.getObjects().forEach((obj) => {
+    if (
+      obj['id'] &&
+      (obj['id'].includes('rect') || obj['id'].includes('sticker'))
+    ) {
+      sourceImageCanvas.remove(obj)
+    }
+  })
 }
 
 /*

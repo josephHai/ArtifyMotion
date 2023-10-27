@@ -149,6 +149,7 @@ import {
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
 import { sleep } from '@bassist/utils'
+import { memeFabric } from '@/utils/style.fabric'
 
 const props = defineProps({
   boxWidth: {
@@ -343,7 +344,13 @@ const addSticker = (
   stickerStyle: stickerStyle
 ) => {
   const newSticker = stickerModify(item, sticker, stickerStyle, true)
-  if (newSticker) sourceImageCanvas.add(newSticker)
+  if (newSticker) {
+    new memeFabric().addDeleteControl(newSticker, sourceImageCanvas, () => {
+      props.trackResults![selectedFaceId].stickerId = ''
+    })
+    if (item.id == selectedFaceId) sourceImageCanvas.setActiveObject(newSticker)
+    sourceImageCanvas.add(newSticker)
+  }
 }
 
 const stickerModify = (
@@ -364,7 +371,7 @@ const stickerModify = (
   sticker.set({
     left: (item.left - leftSpan) * scale,
     top: (item.top - topSpan) * scale,
-    selectable: false,
+    selectable: true,
     hoverCursor: 'pointer',
     lockMovementX: true,
     lockMovementY: true,
@@ -428,8 +435,21 @@ const handleOpClick = (op) => {
 const changeSpeed = (op) => {
   if (op === '+' && playSpeed.value < 2) {
     playSpeed.value = parseFloat((playSpeed.value + 0.1).toFixed(1))
-  } else if (op === '-' && playSpeed.value > 0.1) {
-    playSpeed.value = parseFloat((playSpeed.value - 0.1).toFixed(1))
+    return
+  }
+  if (op === '-') {
+    if (playSpeed.value > 0.1) {
+      playSpeed.value = parseFloat((playSpeed.value - 0.1).toFixed(1))
+      return
+    }
+    if (playSpeed.value == 0.1) {
+      playSpeed.value = 0.05
+      return
+    }
+    if (playSpeed.value === 0.05) {
+      playSpeed.value = 0.01
+      return
+    }
   }
 }
 

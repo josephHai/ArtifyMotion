@@ -373,10 +373,10 @@ const stickerModify = (
   })
   sticker['id'] = stickerId
   sticker.scaleToWidth(
-    item.width * scale + item.width * (stickerStyle.sizeRate - 1)
+    (item.width + item.width * (stickerStyle.sizeRate - 1)) * scale
   )
   sticker.scaleToHeight(
-    item.height * scale + item.height * (stickerStyle.sizeRate - 1)
+    (item.height + item.height * (stickerStyle.sizeRate - 1)) * scale
   )
   sticker.on('mousedown', () => {
     selectedFaceId = item.id as number
@@ -407,9 +407,9 @@ const handleOpClick = (op) => {
   const sizeRate = item.sizeRate ? item.sizeRate : 1
 
   if (op === '+') {
-    item.sizeRate = item.sizeRate = sizeRate + 0.1
+    item.sizeRate = sizeRate + 0.1
   } else if (op === '-') {
-    item.sizeRate = item.sizeRate = sizeRate - 0.1
+    item.sizeRate = sizeRate - 0.1
   } else if (op === 'up') {
     item.topSpan -= 5
   } else if (op === 'down') {

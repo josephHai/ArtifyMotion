@@ -71,7 +71,7 @@ export async function fabricGif(
     const ctx = canvas.getContext('2d')!
     const gifEncoder = new GIF({
       workers: 4,
-      quality: 10,
+      quality: 1,
       workerScript: gifWorkerScript,
       width: canvas.width,
       height: canvas.height,

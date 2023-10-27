@@ -4,6 +4,9 @@
       width: boxWidth + 'px',
       height: boxHeight ? boxHeight + 'px' : 'auto',
     }"
+    v-loading="renderLoading"
+    element-loading-text="rendering..."
+    element-loading-background="rgba(88, 88, 88, 1)"
   >
     <el-row>
       <canvas id="source-image-canvas-frame" width="100%"></canvas>
@@ -179,6 +182,7 @@ const emits = defineEmits(['fusion'])
 const uploadFileStore = useUploadFileStore()
 const showPositionOptions = ref<boolean>(false)
 const playSpeed = ref<number>(1)
+const renderLoading = ref<boolean>(false)
 
 interface FaceBox {
   id: string
@@ -204,9 +208,10 @@ let sourceImageCanvas: fabric.Canvas
 const framesCount = ref<number>(0)
 const stickerBoxes = {}
 let selectedFaceId: number = 1
-let frameRenderInterval: number
+let isRunning: boolean = true
 
 const framesRender = () => {
+  renderLoading.value = true
   sourceImageCanvas = new fabric.Canvas('source-image-canvas-frame')
   sourceImageCanvas.setWidth(props.boxWidth!)
   sourceImageCanvas.setHeight(
@@ -217,6 +222,7 @@ const framesRender = () => {
   const gifPromise = fabricGif(props.sourceImageInfo!.file!, props.boxWidth!)
 
   gifPromise.then((gif) => {
+    renderLoading.value = false
     framesCount.value = gif.totalFrames
     let curFramesIndex = 0
     gif.image.set({
@@ -249,7 +255,8 @@ const framesRender = () => {
       })
       curFramesIndex = (curFramesIndex + 1) % gif.totalFrames
       await sleep(gif.delay / playSpeed.value)
-      fabric.util.requestAnimFrame(animate)
+      if (isRunning) fabric.util.requestAnimFrame(animate)
+      else sourceImageCanvas.dispose()
     }
     animate()
   })
@@ -511,7 +518,7 @@ onMounted(() => {
   framesRender()
 })
 onUnmounted(() => {
-  clearInterval(frameRenderInterval)
+  isRunning = false
 })
 </script>
 

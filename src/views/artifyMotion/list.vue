@@ -157,12 +157,17 @@
                 <el-col :span="6">
                   <el-tooltip
                     effect="dark"
-                    content="Reward"
+                    content="Tips"
                     placement="top"
                     :show-arrow="false"
                     :offset="2"
                   >
-                    <el-icon size="large" color="white" class="pointer">
+                    <el-icon
+                      size="large"
+                      color="white"
+                      class="pointer"
+                      @click="handleTransaction(file['walletAddress'])"
+                    >
                       <i-ep-wallet />
                     </el-icon>
                   </el-tooltip>
@@ -205,6 +210,60 @@
         <i-ep-top />
       </div>
     </el-backtop>
+    <c-modal :show="loadingVisible">
+      <template #title>
+        <div class="text-center">
+          <icon-modal-loader />
+        </div>
+      </template>
+      <template #body>
+        <div class="text-white text-center mt-3">
+          <span v-if="metamaskAction === 'logging'">正在获取钱包地址...</span>
+          <span v-if="metamaskAction === 'transaction'">正在交易...</span>
+        </div>
+      </template>
+    </c-modal>
+    <c-modal :show="transactionModalVisible">
+      <template #title>
+        <div class="text-center text-white">金额选择</div>
+      </template>
+      <template #body>
+        <el-row class="mt-4 mx-3" justify="space-around" :gutter="5">
+          <el-col :span="5">
+            <el-button
+              class="border border-secondary text-white"
+              @click="transaction(1)"
+              text
+              >1eth</el-button
+            >
+          </el-col>
+          <el-col :span="5">
+            <el-button
+              class="border border-secondary text-white"
+              @click="transaction(2)"
+              text
+              >2eth</el-button
+            >
+          </el-col>
+          <el-col :span="5">
+            <el-button
+              class="border border-secondary text-white"
+              @click="transaction(5)"
+              text
+              >5eth</el-button
+            >
+          </el-col>
+          <el-col :span="5">
+            <el-button
+              class="border border-secondary text-white"
+              @click="transaction(10)"
+              text
+              >10eth</el-button
+            >
+          </el-col>
+        </el-row>
+      </template>
+    </c-modal>
   </div>
 </template>
 
@@ -214,7 +273,17 @@ import { useRoute } from 'vue-router'
 import { getFilesList } from '@/api/file'
 import IconLoading from '@/components/icon-loading.vue'
 import { IconLike } from '@/assets/icon'
+import { ElMessage } from 'element-plus'
+import CModal from '@/components/c-modal.vue'
+import { IconModalLoader } from '@/assets/icon/loaders'
+import { useMetamaskStore } from '@/stores/metamask'
+import { eth2weiHex } from '@/utils/common'
 
+const loadingVisible = ref(false)
+const transactionModalVisible = ref(false)
+const metamaskAction = ref<string>('')
+
+// 图片文件获取及渲染
 const latestFiles = ref<object[]>()
 const mostDownloadFiles = ref<object[]>()
 const fileList = ref<object[]>([])
@@ -222,8 +291,6 @@ const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
 const curPage = ref<number>(0)
 let curSpans = 0
-const route = useRoute()
-const keywords = ref<string>('')
 
 const getLatestFiles = () => {
   let params = {
@@ -288,6 +355,60 @@ const loadingData = (visible) => {
 const handleSearch = () => {
   fileList.value = []
   getList()
+}
+
+// eth交易
+const route = useRoute()
+const keywords = ref<string>('')
+const metamaskStore = useMetamaskStore()
+let account: string
+const toWalletAddress = ref<string>('')
+
+const handleTransaction = async (walletAddress) => {
+  metamaskAction.value = 'logging'
+  loadingVisible.value = true
+  account = await metamaskStore.getAccount()
+  loadingVisible.value = false
+  transactionModalVisible.value = true
+  toWalletAddress.value = walletAddress
+}
+
+const transaction = async (amount: number) => {
+  transactionModalVisible.value = false
+  metamaskAction.value = 'transaction'
+  loadingVisible.value = true
+  window.ethereum
+    ?.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: account,
+          to: toWalletAddress.value,
+          value: eth2weiHex(amount),
+        },
+      ],
+    })
+    .then((txHash) => {
+      console.log(txHash)
+    })
+    .catch((err) => {
+      if (err.code === 4001) {
+        ElMessage({
+          type: 'info',
+          message: 'transaction is denied!',
+          duration: 3 * 1000,
+        })
+      } else if (err.code === -32602) {
+        ElMessage({
+          type: 'error',
+          message: 'Something went wrong, please contact the administrator!',
+          duration: 3 * 1000,
+        })
+      }
+    })
+    .finally(() => {
+      loadingVisible.value = false
+    })
 }
 
 onMounted(() => {

@@ -31,6 +31,7 @@
           class="border border-secondary bg-transparent text-white rounded-1"
           size="large"
           v-if="route.name !== 'upload'"
+          @click="getAccount"
         >
           <i-ep-wallet />
         </el-button>
@@ -39,6 +40,16 @@
     <el-main id="content">
       <router-view :key="key" />
     </el-main>
+    <c-modal :show="getAccountLoading">
+      <template #title>
+        <div class="text-center">
+          <icon-modal-loader />
+        </div>
+      </template>
+      <template #body>
+        <div class="text-white text-center mt-3">正在连接钱包。。。</div>
+      </template>
+    </c-modal>
   </el-container>
 </template>
 
@@ -47,9 +58,21 @@ import router from '@/router'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import logo from '@/assets/img/logo.jpg'
+import CModal from '@/components/c-modal.vue'
+import { IconModalLoader } from '@/assets/icon/loaders'
+import { useMetamaskStore } from '@/stores/metamask'
 
 const route = useRoute()
 const key = computed(() => `${String(route.name || route.path)}-${new Date()}`)
+const getAccountLoading = ref<boolean>(false)
+const metamaskStore = useMetamaskStore()
+
+const getAccount = async () => {
+  getAccountLoading.value = true
+  metamaskStore.getAccount().then(() => {
+    getAccountLoading.value = false
+  })
+}
 </script>
 
 <style scoped lang="less">

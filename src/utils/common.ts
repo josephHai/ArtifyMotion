@@ -19,3 +19,7 @@ export const imgEl2Base64 = (el: HTMLImageElement, type: string) => {
   ctx?.drawImage(el, 0, 0)
   return tempCanvas.toDataURL(type)
 }
+
+export const eth2weiHex = (n: number): string => {
+  return (BigInt(n) * 1000000000000000000n).toString(16)
+}

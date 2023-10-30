@@ -210,7 +210,7 @@
         <i-ep-top />
       </div>
     </el-backtop>
-    <c-modal :show="loadingVisible">
+    <c-modal v-model="loadingVisible" lock>
       <template #title>
         <div class="text-center">
           <icon-modal-loader />
@@ -218,14 +218,16 @@
       </template>
       <template #body>
         <div class="text-white text-center mt-3">
-          <span v-if="metamaskAction === 'logging'">正在获取钱包地址...</span>
-          <span v-if="metamaskAction === 'transaction'">正在交易...</span>
+          <span v-if="metamaskAction === 'logging'"
+            >Connecting to your wallet...</span
+          >
+          <span v-if="metamaskAction === 'transaction'">transaction...</span>
         </div>
       </template>
     </c-modal>
-    <c-modal :show="transactionModalVisible">
+    <c-modal v-model="transactionModalVisible">
       <template #title>
-        <div class="text-center text-white">金额选择</div>
+        <div class="text-center text-white">Amount</div>
       </template>
       <template #body>
         <el-row class="mt-4 mx-3" justify="space-around" :gutter="5">
@@ -271,17 +273,16 @@
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import { getFilesList } from '@/api/file'
+import { orderRecord } from '@/api/eth'
 import IconLoading from '@/components/icon-loading.vue'
 import { IconLike } from '@/assets/icon'
 import { ElMessage } from 'element-plus'
 import CModal from '@/components/c-modal.vue'
 import { IconModalLoader } from '@/assets/icon/loaders'
-import { useMetamaskStore } from '@/stores/metamask'
-import { eth2weiHex } from '@/utils/common'
+import { Metamask } from '@/utils/metamask.utils'
+import web3 from 'web3'
 
 const loadingVisible = ref(false)
-const transactionModalVisible = ref(false)
-const metamaskAction = ref<string>('')
 
 // 图片文件获取及渲染
 const latestFiles = ref<object[]>()
@@ -360,14 +361,17 @@ const handleSearch = () => {
 // eth交易
 const route = useRoute()
 const keywords = ref<string>('')
-const metamaskStore = useMetamaskStore()
+const transactionModalVisible = ref(false)
+const metamaskAction = ref<string>('')
+const metamaskInstance = Metamask.getInstance()
 let account: string
 const toWalletAddress = ref<string>('')
 
 const handleTransaction = async (walletAddress) => {
   metamaskAction.value = 'logging'
   loadingVisible.value = true
-  account = await metamaskStore.getAccount()
+  account = await metamaskInstance.getAccount()
+
   loadingVisible.value = false
   transactionModalVisible.value = true
   toWalletAddress.value = walletAddress
@@ -377,6 +381,7 @@ const transaction = async (amount: number) => {
   transactionModalVisible.value = false
   metamaskAction.value = 'transaction'
   loadingVisible.value = true
+  const amountWei = web3.utils.toWei(amount.toString(), 'ether')
   window.ethereum
     ?.request({
       method: 'eth_sendTransaction',
@@ -384,12 +389,19 @@ const transaction = async (amount: number) => {
         {
           from: account,
           to: toWalletAddress.value,
-          value: eth2weiHex(amount),
+          value: parseInt(amountWei).toString(16),
         },
       ],
     })
-    .then((txHash) => {
-      console.log(txHash)
+    .then(async (txHash) => {
+      const chainId = await metamaskInstance.getChainId()
+      const data = new FormData()
+      data.append('chainId', chainId)
+      data.append('fromAddress', account)
+      data.append('toAddress', toWalletAddress.value)
+      data.append('value', amountWei)
+      data.append('txHash', txHash as string)
+      recordTransaction(data)
     })
     .catch((err) => {
       if (err.code === 4001) {
@@ -409,6 +421,10 @@ const transaction = async (amount: number) => {
     .finally(() => {
       loadingVisible.value = false
     })
+}
+
+const recordTransaction = (data) => {
+  orderRecord(data)
 }
 
 onMounted(() => {

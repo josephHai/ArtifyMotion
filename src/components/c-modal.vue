@@ -1,6 +1,9 @@
 <template>
-  <div class="c-modal" v-if="modalShow">
-    <div class="c-modal-body c-bg-secondary pt-4 rounded-3 shadow">
+  <div class="c-modal" v-if="props.modelValue">
+    <div
+      class="c-modal-body c-bg-secondary pt-4 rounded-3 shadow"
+      v-click-outside="onClickOutside"
+    >
       <slot name="title"></slot>
       <slot name="body"></slot>
       <slot name="footer"></slot>
@@ -9,28 +12,39 @@
 </template>
 
 <script setup lang="ts">
+import { ClickOutside as vClickOutside } from 'element-plus'
+
 defineComponent({
   name: 'CModal',
 })
 
 const props = defineProps({
-  show: {
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
+  lock: {
     type: Boolean,
     default: false,
   },
 })
 
-const modalShow = ref(false)
+const emits = defineEmits(['update:modelValue'])
+
+const onClickOutside = () => {
+  if (props.modelValue && !props.lock) {
+    emits('update:modelValue', false)
+  }
+}
 
 watch(
-  () => props.show,
+  () => props.modelValue,
   (newValue) => {
     if (newValue === true) {
       document.body.classList.add('c-modal-open')
     } else {
       document.body.classList.remove('c-modal-open')
     }
-    modalShow.value = newValue
   }
 )
 </script>

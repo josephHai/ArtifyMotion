@@ -40,14 +40,16 @@
     <el-main id="content">
       <router-view :key="key" />
     </el-main>
-    <c-modal :show="getAccountLoading">
+    <c-modal v-model="getAccountLoading" lock>
       <template #title>
         <div class="text-center">
           <icon-modal-loader />
         </div>
       </template>
       <template #body>
-        <div class="text-white text-center mt-3">正在连接钱包。。。</div>
+        <div class="text-white text-center mt-3">
+          Connecting to your wallet...
+        </div>
       </template>
     </c-modal>
   </el-container>
@@ -60,16 +62,16 @@ import { computed } from 'vue'
 import logo from '@/assets/img/logo.jpg'
 import CModal from '@/components/c-modal.vue'
 import { IconModalLoader } from '@/assets/icon/loaders'
-import { useMetamaskStore } from '@/stores/metamask'
+import { Metamask } from '@/utils/metamask.utils'
 
 const route = useRoute()
 const key = computed(() => `${String(route.name || route.path)}-${new Date()}`)
 const getAccountLoading = ref<boolean>(false)
-const metamaskStore = useMetamaskStore()
+const metamaskInstance = Metamask.getInstance()
 
 const getAccount = async () => {
   getAccountLoading.value = true
-  metamaskStore.getAccount().then(() => {
+  metamaskInstance.getAccount().then(() => {
     getAccountLoading.value = false
   })
 }

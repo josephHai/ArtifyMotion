@@ -32,11 +32,11 @@ service.interceptors.response.use(
     // if the custom code is not 200, it is judged as an error.
     if (res.code !== 200) {
       ElMessage({
-        message: res['msg'] || 'Error',
+        message: res['message'] || 'Error',
         type: 'error',
         duration: 5 * 1000,
       })
-      return Promise.reject(res['msg'])
+      return Promise.reject(res['message'])
     } else {
       return res
     }

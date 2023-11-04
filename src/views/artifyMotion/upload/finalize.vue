@@ -171,7 +171,7 @@ const handleUpload = () => {
   uploadFile(formData)
     .then((res) => {
       ElMessage({
-        message: res['msg'],
+        message: res['message'],
         type: 'success',
         duration: 5 * 1000,
       })

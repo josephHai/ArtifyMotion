@@ -299,7 +299,7 @@ const getLatestFiles = () => {
     keywords: keywords.value,
   }
   getFilesList(params).then((res) => {
-    latestFiles.value = res.data
+    latestFiles.value = res['result']
   })
 }
 
@@ -317,7 +317,7 @@ const getMostDownloadFiles = () => {
     keywords: keywords.value,
   }
   getFilesList(params).then((res) => {
-    mostDownloadFiles.value = res.data
+    mostDownloadFiles.value = res['result']
   })
 }
 
@@ -331,7 +331,7 @@ const getList = () => {
   }
 
   getFilesList(params).then((res) => {
-    let temp = res.data
+    let temp = res['result']
     hasData.value = temp.length > 0
 
     temp.forEach((item) => {

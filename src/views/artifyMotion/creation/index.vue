@@ -300,9 +300,9 @@ const getFileInfo = () => {
   try {
     if (fid) {
       getFileDetails({ fid }).then((res) => {
-        const file_info = res.data.media.src
+        const file_info = res['result'].media.src
 
-        sourceImageInfo.value.fid = res.data.fid
+        sourceImageInfo.value.fid = res['result'].fid
         sourceImageInfo.value.url = file_info.url
         sourceImageInfo.value.width = file_info.dims[0]
         sourceImageInfo.value.height = file_info.dims[1]
@@ -337,11 +337,11 @@ const getFileInfo = () => {
 const handleHeadTrack = (data: FormData) => {
   headTrack(data).then((res) => {
     const data = {}
-    Object.keys(res.data).forEach((id) => {
+    Object.keys(res['result']).forEach((id) => {
       data[id] = {
         stickerId: '',
         stickerStyle: undefined,
-        boxes: res.data[id],
+        boxes: res['result'][id],
       }
     })
     trackResults.value = data
@@ -364,7 +364,7 @@ const selectedStickerUrl = ref<string>()
 
 const getOptionalTags = () => {
   getStickerTags().then((res) => {
-    Array.prototype.push.apply(stickersTags.value, res.data)
+    Array.prototype.push.apply(stickersTags.value, res['result'])
   })
 }
 
@@ -386,7 +386,7 @@ const getStickers = () => {
     keywords: selectedTag.value == 'all' ? '' : selectedTag.value,
   }
   getFilesList(params).then((res) => {
-    stickers.value = res.data
+    stickers.value = res['result']
   })
 }
 

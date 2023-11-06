@@ -463,7 +463,12 @@ const changeSpeed = (op) => {
 watch(
   () => props.sourceImageInfo?.url,
   () => {
-    convertGif('download')
+    const url = new URL(props.sourceImageInfo!.url)
+    const searchParams = new URLSearchParams(url.search)
+    const op = searchParams.get('op')
+
+    if (!op) return
+    convertGif(op)
   }
 )
 

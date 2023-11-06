@@ -206,13 +206,13 @@
               download
             </el-button>
           </el-row>
-          <!--          <el-row>-->
-          <!--            <el-button-->
-          <!--              class="w-100 bg-transparent border-0 text-white fw-bold"-->
-          <!--              @click="handleFile('upload')"-->
-          <!--              >Upload to memefun</el-button-->
-          <!--            >-->
-          <!--          </el-row>-->
+          <el-row>
+            <el-button
+              class="w-100 bg-transparent border-0 text-white fw-bold"
+              @click="handleUpload"
+              >Upload to memefun</el-button
+            >
+          </el-row>
         </div>
         <!-- 操作按钮结束 -->
       </el-col>
@@ -408,6 +408,14 @@ const handleDownload = () => {
   } else {
     console.error('Unknown render method')
   }
+}
+
+const handleUpload = () => {
+  const url = new URL(sourceImageInfo.value.url)
+  const baseUrl = `${url.protocol}//${url.host}${url.pathname}`
+
+  sourceImageInfo.value.url =
+    baseUrl + '?op=upload' + '#' + generateRandomString(4)
 }
 
 const handleFusion = (result) => {

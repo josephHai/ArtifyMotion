@@ -280,8 +280,8 @@ const canvasToGif = (op) => {
             link.download = 'memefun.gif'
             link.click()
           } else if (op === 'upload') {
-            uploadFileStore.updateUploadFile('', res['url'], res['file'])
-            router.push({
+            uploadFileStore.updateUploadFile(res['url'], '', res['file'])
+            router.replace({
               name: 'finalize',
             })
           } else {

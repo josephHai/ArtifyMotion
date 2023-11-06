@@ -508,8 +508,8 @@ const convertGif = (op: string) => {
         link.download = 'memefun.gif'
         link.click()
       } else if (op === 'upload') {
-        uploadFileStore.updateUploadFile('', result.url, result.file)
-        router.push({
+        uploadFileStore.updateUploadFile(result.url, '', result.file)
+        router.replace({
           name: 'finalize',
         })
       } else {

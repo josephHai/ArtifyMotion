@@ -210,7 +210,7 @@
         <i-ep-top />
       </div>
     </el-backtop>
-    <c-modal v-model="loadingVisible" lock>
+    <c-modal v-model="loadingVisible" width="30%" lock>
       <template #title>
         <div class="text-center">
           <icon-modal-loader />
@@ -225,7 +225,7 @@
         </div>
       </template>
     </c-modal>
-    <c-modal v-model="transactionModalVisible">
+    <c-modal v-model="transactionModalVisible" width="30%">
       <template #title>
         <div class="text-center text-white">Amount</div>
       </template>
@@ -401,7 +401,7 @@ const transaction = async (amount: number) => {
       data.append('toAddress', toWalletAddress.value)
       data.append('value', amountWei)
       data.append('txHash', txHash as string)
-      recordTransaction(data)
+      await orderRecord(data)
     })
     .catch((err) => {
       if (err.code === 4001) {
@@ -421,10 +421,6 @@ const transaction = async (amount: number) => {
     .finally(() => {
       loadingVisible.value = false
     })
-}
-
-const recordTransaction = (data) => {
-  orderRecord(data)
 }
 
 onMounted(() => {

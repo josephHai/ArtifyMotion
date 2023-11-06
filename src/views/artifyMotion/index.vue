@@ -40,7 +40,7 @@
     <el-main id="content">
       <router-view :key="key" />
     </el-main>
-    <c-modal v-model="getAccountLoading" lock>
+    <c-modal v-model="getAccountLoading" width="30%" lock>
       <template #title>
         <div class="text-center">
           <icon-modal-loader />

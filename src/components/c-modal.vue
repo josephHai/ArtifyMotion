@@ -1,7 +1,8 @@
 <template>
   <div class="c-modal" v-if="props.modelValue">
     <div
-      class="c-modal-body c-bg-secondary pt-4 rounded-3 shadow"
+      class="c-modal-body c-bg-secondary pt-4 rounded-3 shadow px-3"
+      :style="{ width: props.width }"
       v-click-outside="onClickOutside"
     >
       <slot name="title"></slot>
@@ -26,6 +27,10 @@ const props = defineProps({
   lock: {
     type: Boolean,
     default: false,
+  },
+  width: {
+    type: String,
+    default: '50%',
   },
 })
 
@@ -60,7 +65,6 @@ watch(
 }
 .c-modal-body {
   position: relative;
-  max-width: 400px;
   margin: 40vh auto;
   min-height: 150px;
 }

@@ -3,7 +3,10 @@
     <el-row>
       <el-col :span="12">
         <el-card class="py-4 border-0 card-left">
-          <el-row class="align-items-center pointer text-white" @click="goBack">
+          <el-row
+            class="align-items-center pointer text-white"
+            @click="router.back()"
+          >
             <el-icon :size="24">
               <i-ep-arrow-left />
             </el-icon>
@@ -111,19 +114,54 @@
               class="w-100 text-white c-btn-bg-cold border-0 fw-bolder"
               @click="handleUpload"
             >
-              Upload to memefun
+              Upload
             </el-button>
           </el-row>
           <el-row class="mt-1">
             <el-button
               class="w-100 text-white border-0 mt-2 fw-bold"
               style="background: rgba(33, 33, 33, 1)"
-              >Download</el-button
+              @click="handleMint"
+              >Upload & Mint</el-button
             >
           </el-row>
         </el-card>
       </el-col>
     </el-row>
+    <c-modal
+      v-model="mintModalShow"
+      :lock="mintLoading || getAccountLoading"
+      :width="mintLoading || getAccountLoading ? '30%' : '60%'"
+    >
+      <template #title v-if="mintLoading || getAccountLoading">
+        <div class="text-center">
+          <icon-modal-loader />
+        </div>
+      </template>
+      <template #title v-else>
+        <div class="text-center text-white">Mint Successfully!</div>
+      </template>
+      <template #body v-if="mintLoading || getAccountLoading">
+        <div class="text-white text-center mt-3">
+          <span v-if="getAccountLoading">Connecting to your wallet...</span>
+          <span v-else>Transition...</span>
+        </div>
+      </template>
+      <template #body v-else>
+        <div class="text-white text-center mt-3 border border-1 border-white">
+          <el-row>
+            <el-col :span="8" class="border-end border-white"
+              >transactionHash</el-col
+            >
+            <el-col :span="16">
+              <span class="text-break">{{
+                transactionResult['transactionHash']
+              }}</span>
+            </el-col>
+          </el-row>
+        </div>
+      </template>
+    </c-modal>
   </div>
 </template>
 
@@ -131,19 +169,22 @@
 import BtnSwitch from '@/components/btn-switch.vue'
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
-import { uploadFile } from '@/api/file'
+import { uploadFile, getFileDetails } from '@/api/file'
+import { orderRecord } from '@/api/eth'
 import { ElMessage } from 'element-plus'
+import Web3 from 'web3'
+import abi from '@/assets/MemeFunAbi.json'
+import { Metamask } from '@/utils/metamask.utils'
+import CModal from '@/components/c-modal.vue'
+import { IconModalLoader } from '@/assets/icon/loaders'
 
+// 文件上传
 const tag = ref<string>('')
 const tags = ref<string[]>([])
 const sourceUrl = ref()
 const imageName = ref()
 const visibility = ref(true)
 const uploadFileStore = useUploadFileStore()
-
-const goBack = () => {
-  router.back()
-}
 
 const addTag = () => {
   if (tag.value !== '') {
@@ -159,6 +200,17 @@ const handleClose = (tag: string) => {
 }
 
 const handleUpload = () => {
+  upload().then(() => {
+    ElMessage({
+      type: 'success',
+      message: 'success',
+      duration: 3 * 1000,
+    })
+    router.back()
+  })
+}
+
+const upload = async () => {
   const formData = new FormData()
 
   formData.append(
@@ -168,18 +220,62 @@ const handleUpload = () => {
   formData.append('accessPermission', visibility ? 'public' : 'private')
   formData.append('tags', tags.value.join(''))
 
-  uploadFile(formData)
-    .then((res) => {
+  return await uploadFile(formData)
+}
+
+// 文件url铸造
+const metamaskInstance = Metamask.getInstance()
+const getAccountLoading = ref(false)
+const mintLoading = ref(false)
+const mintModalShow = ref(false)
+const transactionResult = ref()
+
+const handleMint = async () => {
+  mintModalShow.value = true
+
+  // 连接用户钱包
+  getAccountLoading.value = true
+  const account = await metamaskInstance.getAccount()
+  getAccountLoading.value = false
+
+  mintLoading.value = true
+  // 获取文件url
+  const url = await upload().then(async (res) => {
+    const { result } = await getFileDetails({ fid: res['result']['fid'] })
+    return result['media']['src']['url']
+  })
+  // 加载合约
+  const contract = await loadContract()
+  transactionResult.value = await contract.methods
+    .mint(account as any, url as any)
+    .send({ from: account })
+    .then(async (res) => {
+      const chainId = await metamaskInstance.getChainId()
+      const data = new FormData()
+      data.append('chainId', chainId)
+      data.append('fromAddress', res.from)
+      data.append('toAddress', res.to)
+      data.append('value', '0')
+      data.append('txHash', res.transactionHash)
+      await orderRecord(data)
+      return res
+    })
+    .catch(() => {
       ElMessage({
-        message: res['message'],
-        type: 'success',
-        duration: 5 * 1000,
+        type: 'info',
+        message: 'transaction is denied!',
+        duration: 3 * 1000,
       })
-      goBack()
+      return undefined
     })
-    .catch((e) => {
-      console.log(e)
-    })
+  if (!transactionResult.value) mintModalShow.value = false
+  mintLoading.value = false
+}
+
+const loadContract = async () => {
+  const web3 = new Web3(window.ethereum)
+  const address = '0xf8CB65a57ef864A784401c0110c4Ce8dA582A2D0'
+  return new web3.eth.Contract(abi, address)
 }
 
 onMounted(() => {

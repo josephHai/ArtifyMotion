@@ -130,8 +130,10 @@
     </el-row>
     <c-modal
       v-model="mintModalShow"
-      :lock="mintLoading || getAccountLoading"
+      :show-close="!mintLoading && !getAccountLoading"
       :width="mintLoading || getAccountLoading ? '30%' : '60%'"
+      :before-close="handleModalClose"
+      lock
     >
       <template #title v-if="mintLoading || getAccountLoading">
         <div class="text-center">
@@ -266,6 +268,7 @@ const handleMint = async () => {
         message: 'transaction is denied!',
         duration: 3 * 1000,
       })
+      router.back()
       return undefined
     })
   if (!transactionResult.value) mintModalShow.value = false
@@ -276,6 +279,11 @@ const loadContract = async () => {
   const web3 = new Web3(window.ethereum)
   const address = '0xf8CB65a57ef864A784401c0110c4Ce8dA582A2D0'
   return new web3.eth.Contract(abi, address)
+}
+
+const handleModalClose = (done) => {
+  done()
+  router.back()
 }
 
 onMounted(() => {

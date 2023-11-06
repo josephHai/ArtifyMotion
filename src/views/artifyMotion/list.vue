@@ -210,7 +210,7 @@
         <i-ep-top />
       </div>
     </el-backtop>
-    <c-modal v-model="loadingVisible" width="30%" lock>
+    <c-modal v-model="loadingVisible" width="30%" lock :show-close="false">
       <template #title>
         <div class="text-center">
           <icon-modal-loader />

@@ -1,10 +1,18 @@
 <template>
   <div class="c-modal" v-if="props.modelValue">
     <div
-      class="c-modal-body c-bg-secondary pt-4 rounded-3 shadow px-3"
+      class="c-modal-body c-bg-secondary rounded-3 shadow px-3"
+      :class="{ 'pt-4': !props.showClose }"
       :style="{ width: props.width }"
       v-click-outside="onClickOutside"
     >
+      <div
+        v-if="props.showClose"
+        class="text-white text-end pointer"
+        @click="onClickClose"
+      >
+        <i-ep-close />
+      </div>
       <slot name="title"></slot>
       <slot name="body"></slot>
       <slot name="footer"></slot>
@@ -32,12 +40,38 @@ const props = defineProps({
     type: String,
     default: '50%',
   },
+  showClose: {
+    type: Boolean,
+    default: true,
+  },
+  beforeClose: {
+    type: Function,
+    default: undefined,
+  },
 })
 
 const emits = defineEmits(['update:modelValue'])
 
 const onClickOutside = () => {
-  if (props.modelValue && !props.lock) {
+  if (props.lock) return
+  if (props.beforeClose === undefined) {
+    done()
+  } else {
+    props.beforeClose(done)
+  }
+}
+
+const onClickClose = () => {
+  if (props.beforeClose !== undefined) {
+    props.beforeClose(done)
+  } else {
+    done()
+  }
+}
+
+// 关闭modal
+const done = () => {
+  if (props.modelValue) {
     emits('update:modelValue', false)
   }
 }

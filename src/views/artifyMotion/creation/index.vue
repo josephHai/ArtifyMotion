@@ -399,15 +399,8 @@ const handleDownload = () => {
   const url = new URL(sourceImageInfo.value.url)
   const baseUrl = `${url.protocol}//${url.host}${url.pathname}`
 
-  if (renderMethod.value === 'gif') {
-    sourceImageInfo.value.url =
-      baseUrl + '?op=download' + '#' + generateRandomString(4)
-  } else if (renderMethod.value === 'frame') {
-    sourceImageInfo.value.url =
-      baseUrl + '?op=fusion' + '#' + generateRandomString(4)
-  } else {
-    console.error('Unknown render method')
-  }
+  sourceImageInfo.value.url =
+    baseUrl + '?op=download' + '#' + generateRandomString(4)
 }
 
 const handleUpload = () => {

@@ -24,7 +24,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'list',
-        component: () => import('@/views/artifyMotion/list.vue'),
+        component: () => import('@/views/artifyMotion/gallary.vue'),
       },
       {
         path: 'upload/:behavior?',

@@ -23,3 +23,10 @@ export const imgEl2Base64 = (el: HTMLImageElement, type: string) => {
 export const eth2weiHex = (n: number): string => {
   return (BigInt(n) * 1000000000000000000n).toString(16)
 }
+
+export const url2filename = (url: string): string => {
+  const urlObj = new URL(url)
+  const pathName = urlObj.pathname
+
+  return pathName.split('/').pop() as string
+}

@@ -16,6 +16,7 @@ import { memeFabric } from '@/utils/style.fabric'
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
 import { ElMessage } from 'element-plus'
+import { url2filename } from '@/utils/common'
 
 const props = defineProps({
   boxWidth: {
@@ -272,8 +273,12 @@ const canvasToGif = (op) => {
         tempFabricObjects.push(tempFabricText)
       }
       gif
-        .mergeFramesToGif(tempFabricObjects)
+        .mergeFramesToGif(
+          tempFabricObjects,
+          url2filename(props.sourceImageInfo!.url)
+        )
         .then((res) => {
+          console.log(res)
           isBusy = false
           if (op === 'download') {
             link.href = res['url']

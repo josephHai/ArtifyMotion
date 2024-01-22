@@ -224,13 +224,15 @@
 <script setup lang="ts">
 import GifRender from '@/components/gif-render.vue'
 import FrameRender from '@/components/frame-render.vue'
-import { getFileDetails, getFilesList, getStickerTags } from '@/api/file'
+import { getFilesList, getStickerTags } from '@/api/file'
+import { getPosts } from '@/api/tenor'
 import { headTrack } from '@/api/creation'
 import { useRoute } from 'vue-router'
 import { ClickOutside as vClickOutside } from 'element-plus'
-import { generateRandomString } from '@/utils/common'
+import { generateRandomString, url2filename } from '@/utils/common'
 import { useUploadFileStore } from '@/stores'
 import { gifToSprites } from '@/utils/gif.utils'
+import { PageParamsModel, ResponseObject } from '@/api/tenor/model/tenorModel'
 
 // global variable
 const uploadFileStore = useUploadFileStore()
@@ -293,23 +295,36 @@ const fontFamilies = ref<object[]>([
 ])
 
 const getFileInfo = () => {
-  const fid = useRoute().params.id
+  const fid = useRoute().params.id as string
   const data = new FormData()
 
   trackLoading.value = true
   try {
     if (fid) {
-      getFileDetails({ fid }).then((res) => {
-        const file_info = res['result'].media.src
+      const params = new PageParamsModel()
+      params.ids = fid
+      getPosts(params).then((res) => {
+        const file_info = res['results'][0] as ResponseObject
 
-        sourceImageInfo.value.fid = res['result'].fid
-        sourceImageInfo.value.url = file_info.url
-        sourceImageInfo.value.width = file_info.dims[0]
-        sourceImageInfo.value.height = file_info.dims[1]
-        sourceImageInfo.value.file = file_info.url
+        sourceImageInfo.value.fid = file_info.id
+        sourceImageInfo.value.url = file_info.media_formats.gif.url
+        sourceImageInfo.value.width = file_info.media_formats.gif.dims[0]
+        sourceImageInfo.value.height = file_info.media_formats.gif.dims[1]
+        sourceImageInfo.value.file = file_info.media_formats.gif.url
 
-        data.append('fid', fid as string)
-        handleHeadTrack(data)
+        fetch(file_info.media_formats.gif.url).then((res) => {
+          res.blob().then((blob) => {
+            const file = new File(
+              [blob],
+              url2filename(file_info.media_formats.gif.url),
+              {
+                type: blob.type,
+              }
+            )
+            data.append('file', file)
+            handleHeadTrack(data)
+          })
+        })
       })
     } else {
       let uploadFile = undefined

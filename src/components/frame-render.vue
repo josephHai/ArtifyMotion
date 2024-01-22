@@ -141,7 +141,7 @@
 <script setup lang="ts">
 import { fabric } from 'fabric'
 import { fabricGif } from '@/utils/gif.fabric'
-import { generateRandomString } from '@/utils/common'
+import { generateRandomString, url2filename } from '@/utils/common'
 import {
   IconEdit,
   IconSearchPlus,
@@ -500,22 +500,25 @@ const convertGif = (op: string) => {
     })
   }
   fabricGif(props.sourceImageInfo!.file!).then((gif) => {
-    gif.mergeFramesToGif(tempStickers).then((result) => {
-      if (op === 'fusion') emits('fusion', result)
-      else if (op === 'download') {
-        const link = document.createElement('a')
-        link.href = result.url
-        link.download = 'memefun.gif'
-        link.click()
-      } else if (op === 'upload') {
-        uploadFileStore.updateUploadFile(result.url, '', result.file)
-        router.replace({
-          name: 'finalize',
-        })
-      } else {
-        console.log('error')
-      }
-    })
+    gif
+      .mergeFramesToGif(tempStickers, url2filename(props.sourceImageInfo!.url))
+      .then((res) => {
+        console.log(res)
+        if (op === 'fusion') emits('fusion', result)
+        else if (op === 'download') {
+          const link = document.createElement('a')
+          link.href = res.url
+          link.download = 'memefun.gif'
+          link.click()
+        } else if (op === 'upload') {
+          uploadFileStore.updateUploadFile(res.url, '', res.file)
+          router.replace({
+            name: 'finalize',
+          })
+        } else {
+          console.log('error')
+        }
+      })
   })
 }
 

@@ -1,18 +1,20 @@
 <template>
   <div>
-    <el-input
+    <el-autocomplete
+      class="searchBox w-100"
       v-model="keywords"
+      :fetch-suggestions="querySearch"
       :placeholder="$t('tips.input')"
-      class="searchBox"
+      @select="handleQuerySelect"
+      :trigger-on-focus="false"
       size="large"
-      v-if="route.name === 'list'"
     >
       <template #append>
         <el-icon size="20" color="white" @click="handleSearch"
           ><i-ep-search
         /></el-icon>
       </template>
-    </el-input>
+    </el-autocomplete>
     <!-- 最近上传的文件 -->
     <div v-if="false">
       <el-row>
@@ -32,7 +34,7 @@
             class="rounded-1"
             style="width: 100%; height: 200px"
             fit="cover"
-            :src="file['media']['preview']['url']"
+            :src="file.media_formats.gif.preview || file.media_formats.gif.url"
           />
           <div class="overlay text-center">
             <el-row :gutter="40" style="z-index: 100">
@@ -125,14 +127,14 @@
           <el-col
             class="pointer image-container"
             v-for="file in fileList"
-            :key="file['fid']"
+            :key="file.id"
             :span="file['span']"
           >
             <el-image
               class="rounded-1"
               fit="cover"
               style="width: 100%; height: 314px"
-              :src="file['media']['preview']['url']"
+              :src="file.media_formats.tinygif.url"
             />
             <div class="overlay text-center">
               <el-row :gutter="40" style="z-index: 100">
@@ -148,7 +150,7 @@
                       size="large"
                       color="white"
                       class="pointer"
-                      @click="navigateTo('creation', { id: file['fid'] })"
+                      @click="navigateTo('creation', { id: file.id })"
                     >
                       <i-ep-edit />
                     </el-icon>
@@ -271,8 +273,12 @@
 
 <script setup lang="ts">
 import router from '@/router'
-import { useRoute } from 'vue-router'
-import { getFilesList } from '@/api/file'
+import { getFeatured, autocomplete } from '@/api/tenor'
+import {
+  PageParamsModel,
+  ResponseObject,
+  PageResultModel,
+} from '@/api/tenor/model/tenorModel'
 import { orderRecord } from '@/api/eth'
 import IconLoading from '@/components/icon-loading.vue'
 import { IconLike } from '@/assets/icon'
@@ -285,23 +291,13 @@ import web3 from 'web3'
 const loadingVisible = ref(false)
 
 // 图片文件获取及渲染
-const latestFiles = ref<object[]>()
+const latestFiles = ref<ResponseObject[]>()
 const mostDownloadFiles = ref<object[]>()
-const fileList = ref<object[]>([])
+const fileList = ref<ResponseObject[]>([])
 const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
-const curPage = ref<number>(0)
+const curPos = ref<string | number>('')
 let curSpans = 0
-
-const getLatestFiles = () => {
-  let params = {
-    limit: 6,
-    keywords: keywords.value,
-  }
-  getFilesList(params).then((res) => {
-    latestFiles.value = res['result']
-  })
-}
 
 const navigateTo = (name, params) => {
   router.push({
@@ -310,47 +306,53 @@ const navigateTo = (name, params) => {
   })
 }
 
-const getMostDownloadFiles = () => {
-  let params = {
-    limit: 6,
-    orderBy: 'download',
-    keywords: keywords.value,
-  }
-  getFilesList(params).then((res) => {
-    mostDownloadFiles.value = res['result']
-  })
-}
-
 const getList = () => {
   busy.value = true
-  curPage.value += 1
-  let params = {
-    page: curPage.value,
-    limit: 40,
-    keywords: keywords.value,
-  }
+  const params = new PageParamsModel()
+  params.pos = curPos.value
 
-  getFilesList(params).then((res) => {
-    let temp = res['result']
-    hasData.value = temp.length > 0
+  getFeatured(params)
+    .then((res) => {
+      let temp = res as PageResultModel
+      curPos.value = temp.next
+      hasData.value = temp.results.length > 0
 
-    temp.forEach((item) => {
-      const width = item.media.preview.dims[0]
-      const height = item.media.preview.dims[1]
-      if (width / height >= 1.5) {
-        item['span'] = curSpans + 8 > 24 ? 4 : 8
-      } else {
-        item['span'] = 4
-      }
-      curSpans = curSpans + item['span'] == 24 ? 0 : curSpans + item['span']
-      fileList.value.push(item)
+      temp.results.forEach((item) => {
+        const width = item.media_formats.gif.dims[0]
+        const height = item.media_formats.gif.dims[1]
+        if (width / height >= 1.5) {
+          item['span'] = curSpans + 8 > 24 ? 4 : 8
+        } else {
+          item['span'] = 4
+        }
+        curSpans = curSpans + item['span'] == 24 ? 0 : curSpans + item['span']
+        fileList.value.push(item)
+      })
+      busy.value = false
     })
-    busy.value = false
-  })
+    .catch((e) => {
+      console.log(e)
+    })
 }
 
 const loadingData = (visible) => {
   if (visible && hasData.value && !busy.value) getList()
+}
+
+const querySearch = (queryString, callback) => {
+  let params: PageParamsModel = new PageParamsModel()
+  params.q = queryString
+  autocomplete(params).then((res) => {
+    const results = []
+    res['results'].map((item) => {
+      results.push({ value: item })
+    })
+    callback(results)
+  })
+}
+
+const handleQuerySelect = (item) => {
+  console.log(item)
 }
 
 const handleSearch = () => {
@@ -359,7 +361,6 @@ const handleSearch = () => {
 }
 
 // eth交易
-const route = useRoute()
 const keywords = ref<string>('')
 const transactionModalVisible = ref(false)
 const metamaskAction = ref<string>('')
@@ -423,10 +424,7 @@ const transaction = async (amount: number) => {
     })
 }
 
-onMounted(() => {
-  getLatestFiles()
-  getMostDownloadFiles()
-})
+onMounted(() => {})
 </script>
 
 <style scoped lang="less">

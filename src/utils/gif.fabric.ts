@@ -60,10 +60,12 @@ export async function fabricGif(
    * （像素缺失的原因参考 gif optimization）
    *
    * @param modifiedContent
+   * @param filename 文件名称 可选
    * @return gifUrl: string
    */
   const mergeFramesToGif = (
-    modifiedContent: fabric.Object[] | fabric.Object[][]
+    modifiedContent: fabric.Object[] | fabric.Object[][],
+    filename?: string
   ) => {
     const canvas = document.createElement('canvas')
     canvas.width = frameWidth
@@ -88,7 +90,7 @@ export async function fabricGif(
         loadingInstance.close()
         resolve({
           url: URL.createObjectURL(blob),
-          file: new File([blob], 'memefun', {
+          file: new File([blob], filename || 'memefun', {
             type: blob.type,
           }),
         })

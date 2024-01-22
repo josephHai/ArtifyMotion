@@ -29,6 +29,10 @@ service.interceptors.response.use(
   (response) => {
     const res = response.data
 
+    if (response.config.url!.includes('tenor')) {
+      return Promise.resolve(res)
+    }
+
     // if the custom code is not 200, it is judged as an error.
     if (res.code !== 200) {
       ElMessage({

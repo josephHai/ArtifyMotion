@@ -26,3 +26,11 @@ export function autocomplete(params: PageParamsModel) {
     params,
   })
 }
+
+export function search(params: PageParamsModel) {
+  return request({
+    url: TENOR_BASE_API + 'search',
+    method: 'get',
+    params,
+  })
+}

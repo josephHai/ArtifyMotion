@@ -1,13 +1,15 @@
 <template>
   <div>
     <el-autocomplete
-      class="searchBox w-100"
+      class="w-100"
       v-model="keywords"
       :fetch-suggestions="querySearch"
       :placeholder="$t('tips.input')"
-      @select="handleQuerySelect"
+      @select="handleSearch"
       :trigger-on-focus="false"
       size="large"
+      @input="showSuggestion"
+      @keyup.enter="handleSearch"
     >
       <template #append>
         <el-icon size="20" color="white" @click="handleSearch"
@@ -273,7 +275,7 @@
 
 <script setup lang="ts">
 import router from '@/router'
-import { getFeatured, autocomplete } from '@/api/tenor'
+import { getFeatured, autocomplete, search } from '@/api/tenor'
 import {
   PageParamsModel,
   ResponseObject,
@@ -291,6 +293,7 @@ import web3 from 'web3'
 const loadingVisible = ref(false)
 
 // 图片文件获取及渲染
+const keywords = ref<string>('')
 const latestFiles = ref<ResponseObject[]>()
 const mostDownloadFiles = ref<object[]>()
 const fileList = ref<ResponseObject[]>([])
@@ -306,12 +309,27 @@ const navigateTo = (name, params) => {
   })
 }
 
+/**
+ * 获取素材列表
+ *
+ * 若keywords为空，则调用getFeatured接口，反之调用search接口
+ */
+
 const getList = () => {
   busy.value = true
+
   const params = new PageParamsModel()
   params.pos = curPos.value
 
-  getFeatured(params)
+  let requestObj
+  if (keywords.value) {
+    params.q = keywords.value
+    requestObj = search(params)
+  } else {
+    requestObj = getFeatured(params)
+  }
+
+  requestObj
     .then((res) => {
       let temp = res as PageResultModel
       curPos.value = temp.next
@@ -335,10 +353,29 @@ const getList = () => {
     })
 }
 
+// 搜索事件，每次搜索之前清空之前的列表状态
+const handleSearch = () => {
+  fileList.value = []
+  curPos.value = ''
+  hideSuggestion()
+  getList()
+}
+
+const hideSuggestion = () => {
+  document.querySelectorAll('.el-autocomplete__popper')[0].style.display =
+    'none'
+}
+
+const showSuggestion = () => {
+  document.querySelectorAll('.el-autocomplete__popper')[0].style.display =
+    'block'
+}
+
 const loadingData = (visible) => {
   if (visible && hasData.value && !busy.value) getList()
 }
 
+// 获取搜索建议
 const querySearch = (queryString, callback) => {
   let params: PageParamsModel = new PageParamsModel()
   params.q = queryString
@@ -351,17 +388,7 @@ const querySearch = (queryString, callback) => {
   })
 }
 
-const handleQuerySelect = (item) => {
-  console.log(item)
-}
-
-const handleSearch = () => {
-  fileList.value = []
-  getList()
-}
-
 // eth交易
-const keywords = ref<string>('')
 const transactionModalVisible = ref(false)
 const metamaskAction = ref<string>('')
 const metamaskInstance = Metamask.getInstance()
@@ -448,23 +475,19 @@ onMounted(() => {})
 .image-container:hover .overlay {
   opacity: 1;
 }
-.searchBox {
-  margin-top: 1%;
-  height: 40px;
+
+:deep(.el-input-group__append) {
+  height: 50px;
+  cursor: pointer;
+  border-radius: 0 5px 5px 0;
+  background: linear-gradient(
+    45deg,
+    var(--c-gradient-btn-bg-cold-start),
+    var(--c-gradient-btn-bg-cold-end)
+  );
 }
-.searchBox {
-  :deep(.el-input-group__append) {
-    height: 50px;
-    cursor: pointer;
-    border-radius: 0 5px 5px 0;
-    background: linear-gradient(
-      45deg,
-      var(--c-gradient-btn-bg-cold-start),
-      var(--c-gradient-btn-bg-cold-end)
-    );
-  }
-  :deep(.el-input__wrapper) {
-    height: 50px;
-  }
+
+:deep(.el-input__wrapper) {
+  height: 50px;
 }
 </style>

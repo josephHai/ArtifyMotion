@@ -117,7 +117,11 @@
     </div>
     <!-- 最多次下载的文件结束 -->
     <!-- 文件列表 -->
-    <div class="mt-5 m-auto" element-loading-background="rgba(0,0,0,0)">
+    <div
+      class="mt-5 m-auto"
+      v-if="false"
+      element-loading-background="rgba(0,0,0,0)"
+    >
       <el-row>
         <el-icon color="#f08a5d" size="24">
           <i-ep-files />
@@ -209,6 +213,42 @@
       </el-container>
     </div>
     <!-- 文件列表结束 -->
+    <!-- 素材列表 -->
+    <div ref="materialList" class="mt-5 overflow-hidden">
+      <el-image
+        v-for="file in fileList"
+        :key="file.id"
+        class="material-item mb-3 rounded-1"
+        :src="file.media_formats.tinygif.url"
+        :style="{ height: file.media_formats.tinygif.dims[1] + 'px' }"
+        @click="navigateTo('creation', { id: file.id })"
+        :alt="file.content_description"
+      >
+        <template #placeholder>
+          <div style="width: 100%; height: 100%">Loading...</div>
+        </template>
+      </el-image>
+      <!--      <el-container-->
+      <!--        v-observe-visibility="{-->
+      <!--          callback: loadingData,-->
+      <!--        }"-->
+      <!--        class="mt-3"-->
+      <!--        style="-->
+      <!--          position: absolute;-->
+      <!--          left: 50%;-->
+      <!--          transform: translateX(-50%);-->
+      <!--          bottom: 5px;-->
+      <!--        "-->
+      <!--      >-->
+      <!--        <div v-if="hasData" class="m-auto">-->
+      <!--          <icon-loading />-->
+      <!--        </div>-->
+      <!--        <div v-else class="m-auto">-->
+      <!--          <span class="text-secondary">No more data!</span>-->
+      <!--        </div>-->
+      <!--      </el-container>-->
+    </div>
+    <!-- 素材列表结束 -->
     <el-backtop :right="100" :bottom="100">
       <div class="text-secondary fw-bold" style="font-size: 1.2rem">
         <i-ep-top />
@@ -289,8 +329,12 @@ import CModal from '@/components/c-modal.vue'
 import { IconModalLoader } from '@/assets/icon/loaders'
 import { Metamask } from '@/utils/metamask.utils'
 import web3 from 'web3'
+import Masonry from 'masonry-layout'
+import { nextTick } from 'vue'
 
 const loadingVisible = ref(false)
+const materialList = ref()
+const _masonry = ref<Masonry>()
 
 // 图片文件获取及渲染
 const keywords = ref<string>('')
@@ -300,12 +344,19 @@ const fileList = ref<ResponseObject[]>([])
 const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
 const curPos = ref<string | number>('')
-let curSpans = 0
 
 const navigateTo = (name, params) => {
   router.push({
     name,
     params,
+  })
+}
+
+const layout = () => {
+  _masonry.value = new Masonry(materialList.value, {
+    itemSelector: '.material-item',
+    percentPosition: true,
+    gutter: 10,
   })
 }
 
@@ -330,22 +381,13 @@ const getList = () => {
   }
 
   requestObj
-    .then((res) => {
-      let temp = res as PageResultModel
-      curPos.value = temp.next
-      hasData.value = temp.results.length > 0
-
-      temp.results.forEach((item) => {
-        const width = item.media_formats.gif.dims[0]
-        const height = item.media_formats.gif.dims[1]
-        if (width / height >= 1.5) {
-          item['span'] = curSpans + 8 > 24 ? 4 : 8
-        } else {
-          item['span'] = 4
-        }
-        curSpans = curSpans + item['span'] == 24 ? 0 : curSpans + item['span']
+    .then((res: PageResultModel) => {
+      curPos.value = res.next
+      hasData.value = res.results.length > 0
+      res.results.forEach((item) => {
         fileList.value.push(item)
       })
+
       busy.value = false
     })
     .catch((e) => {
@@ -451,7 +493,16 @@ const transaction = async (amount: number) => {
     })
 }
 
-onMounted(() => {})
+onMounted(() => {
+  getList()
+  nextTick(() => {
+    layout()
+  })
+})
+
+onUpdated(() => {
+  layout()
+})
 </script>
 
 <style scoped lang="less">
@@ -489,5 +540,9 @@ onMounted(() => {})
 
 :deep(.el-input__wrapper) {
   height: 50px;
+}
+
+.material-item {
+  width: calc(100% / 4 - 10px);
 }
 </style>

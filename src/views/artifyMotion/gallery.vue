@@ -228,25 +228,25 @@
           <div style="width: 100%; height: 100%">Loading...</div>
         </template>
       </el-image>
-      <!--      <el-container-->
-      <!--        v-observe-visibility="{-->
-      <!--          callback: loadingData,-->
-      <!--        }"-->
-      <!--        class="mt-3"-->
-      <!--        style="-->
-      <!--          position: absolute;-->
-      <!--          left: 50%;-->
-      <!--          transform: translateX(-50%);-->
-      <!--          bottom: 5px;-->
-      <!--        "-->
-      <!--      >-->
-      <!--        <div v-if="hasData" class="m-auto">-->
-      <!--          <icon-loading />-->
-      <!--        </div>-->
-      <!--        <div v-else class="m-auto">-->
-      <!--          <span class="text-secondary">No more data!</span>-->
-      <!--        </div>-->
-      <!--      </el-container>-->
+      <el-container
+        v-observe-visibility="{
+          callback: loadingData,
+        }"
+        class="mt-3"
+        style="
+          position: absolute;
+          left: 50%;
+          transform: translateX(-50%);
+          bottom: 5px;
+        "
+      >
+        <div v-if="hasData" class="m-auto">
+          <icon-loading />
+        </div>
+        <div v-else class="m-auto">
+          <span class="text-secondary">No more data!</span>
+        </div>
+      </el-container>
     </div>
     <!-- 素材列表结束 -->
     <el-backtop :right="100" :bottom="100">

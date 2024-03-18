@@ -27,14 +27,25 @@
         >
           {{ $t('message.creation') }}
         </el-button>
-        <el-button
-          class="border border-secondary bg-transparent text-white rounded-1"
-          size="large"
-          v-if="route.name !== 'upload'"
-          @click="getAccount"
-        >
-          <i-ep-wallet />
-        </el-button>
+        <el-dropdown style="margin-left: 16px">
+          <span class="el-dropdown-link">
+            <el-avatar
+              :size="36"
+              src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+            />
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="navigateTo('login', '')"
+                >Log in</el-dropdown-item
+              >
+              <el-dropdown-item @click="navigateTo('register', '')"
+                >Sign up</el-dropdown-item
+              >
+              <el-dropdown-item @click="getAccount">Wallet</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </el-header>
     <el-main id="content">
@@ -63,6 +74,7 @@ import logo from '@/assets/img/logo.jpg'
 import CModal from '@/components/c-modal.vue'
 import { IconModalLoader } from '@/assets/icon/loaders'
 import { Metamask } from '@/utils/metamask.utils'
+import { navigateTo } from '@/utils/common'
 
 const route = useRoute()
 const key = computed(() => `${String(route.name || route.path)}-${new Date()}`)

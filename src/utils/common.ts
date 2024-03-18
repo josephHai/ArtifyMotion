@@ -1,3 +1,5 @@
+import router from '@/router'
+
 export const generateRandomString = (len?: number) => {
   if (!len) len = 8
   const characters =
@@ -29,4 +31,11 @@ export const url2filename = (url: string): string => {
   const pathName = urlObj.pathname
 
   return pathName.split('/').pop() as string
+}
+
+export const navigateTo = (name, params) => {
+  router.push({
+    name,
+    params,
+  })
 }

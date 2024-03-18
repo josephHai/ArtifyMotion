@@ -16,6 +16,36 @@ const routes: RouteRecordRaw[] = [
       title: 'Home',
     },
   },
+  /**
+   * 用户中心
+   */
+  {
+    path: '/account',
+    name: 'account',
+    component: () => import('@/views/artifyMotion/index.vue'),
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import('@/views/artifyMotion/account/login.vue'),
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('@/views/artifyMotion/account/register.vue'),
+      },
+      {
+        path: 'home',
+        name: 'userHome',
+        component: () => import('@/views/artifyMotion/account/home.vue'),
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        component: () => import('@/views/artifyMotion/account/profile.vue'),
+      },
+    ],
+  },
   {
     path: '/',
     name: '',

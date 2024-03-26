@@ -1,4 +1,6 @@
-import request from '@/utils/request'
+import createAxios from '@/utils/request'
+
+const request = createAxios()
 
 export function uploadFile(data: object) {
   return request({

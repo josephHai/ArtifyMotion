@@ -1,11 +1,11 @@
-import request from '@/utils/request'
+import createAxios from '@/utils/request'
 import { PageParamsModel } from '@/api/tenor/model/tenorModel'
 
-const TENOR_BASE_API = 'https://tenor.googleapis.com/v2/'
+const request = createAxios('https://tenor.googleapis.com/v2/')
 
 export function getFeatured(params: PageParamsModel) {
   return request({
-    url: TENOR_BASE_API + 'featured',
+    url: 'featured',
     method: 'get',
     params,
   })
@@ -13,7 +13,7 @@ export function getFeatured(params: PageParamsModel) {
 
 export function getPosts(params: PageParamsModel) {
   return request({
-    url: TENOR_BASE_API + 'posts',
+    url: 'posts',
     method: 'get',
     params,
   })
@@ -21,7 +21,7 @@ export function getPosts(params: PageParamsModel) {
 
 export function autocomplete(params: PageParamsModel) {
   return request({
-    url: TENOR_BASE_API + 'autocomplete',
+    url: 'autocomplete',
     method: 'get',
     params,
   })
@@ -29,7 +29,7 @@ export function autocomplete(params: PageParamsModel) {
 
 export function search(params: PageParamsModel) {
   return request({
-    url: TENOR_BASE_API + 'search',
+    url: 'search',
     method: 'get',
     params,
   })

@@ -503,8 +503,7 @@ const convertGif = (op: string) => {
     gif
       .mergeFramesToGif(tempStickers, url2filename(props.sourceImageInfo!.url))
       .then((res) => {
-        console.log(res)
-        if (op === 'fusion') emits('fusion', result)
+        if (op === 'fusion') emits('fusion', res)
         else if (op === 'download') {
           const link = document.createElement('a')
           link.href = res.url

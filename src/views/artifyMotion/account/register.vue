@@ -10,7 +10,7 @@
         style="max-width: 600px"
         label-position="top"
       >
-        <el-form-item label="Username" prop="email">
+        <el-form-item label="Username" prop="username">
           <el-input
             v-model="form.username"
             placeholder="Please input username"
@@ -41,7 +41,12 @@
             placeholder="Please input emailCode"
             style="width: 320px"
           ></el-input>
-          <el-button class="mx-3">auth</el-button>
+          <el-button v-show="!isCount" @click="acquire" style="width: 100px"
+            >auth</el-button
+          >
+          <el-button v-show="isCount" style="width: 100px" disabled
+            >{{ countTime }}s</el-button
+          >
         </el-form-item>
         <el-form-item>
           <el-button
@@ -49,7 +54,7 @@
             style="width: 480px"
             @click="onSubmit(accountFormRef)"
             round
-            >Sign in</el-button
+            >Sign up</el-button
           >
         </el-form-item>
         <el-form-item>
@@ -88,7 +93,23 @@ const form = reactive<AccountForm>({
   email: '',
   address: '',
   emailCode: '',
-})
+} as AccountForm)
+
+// 获取验证码计时
+const isCount = ref<boolean>(false)
+let countTime = ref<number>(0)
+
+const acquire = () => {
+  isCount.value = true
+  countTime.value = 5
+  const countInterval = setInterval(() => {
+    countTime.value--
+    if (countTime.value <= 0) {
+      clearInterval(countInterval)
+      isCount.value = false
+    }
+  }, 1000)
+}
 
 const rules = reactive<FormRules<AccountForm>>({
   username: [

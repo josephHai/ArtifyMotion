@@ -30,7 +30,7 @@ function createAxios(baseUrl?: string) {
     (response) => {
       const res = response.data
 
-      if (response.config.url!.includes('tenor')) {
+      if (response.config.baseURL!.includes('tenor')) {
         return Promise.resolve(res)
       }
 

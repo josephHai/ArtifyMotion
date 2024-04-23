@@ -135,59 +135,64 @@
         <!-- Caption END -->
         <!-- Stickers -->
         <div v-if="op === 'Stickers'" class="w-100 mt-1">
-          <div class="c-bg-secondary py-2">
-            <el-popover
-              placement="bottom"
-              :width="360"
-              :visible="visible"
-              trigger="click"
-              ref="popoverRef"
-            >
-              <div class="m-auto m-0 px-3">
-                <el-row class="text-start">
-                  <el-col>
-                    <el-text class="fw-bold">Tags</el-text>
-                  </el-col>
-                </el-row>
-                <el-row justify="space-between" class="mt-3">
-                  <el-col
-                    :span="8"
-                    v-for="tag in stickersTags"
-                    :key="tag.id"
-                    class="mt-2"
-                  >
-                    <el-text
-                      class="pointer"
-                      @click="handleTagSelect(tag.value)"
-                    >
-                      # {{ tag.value }}
-                    </el-text>
-                  </el-col>
-                </el-row>
-              </div>
-              <template #reference>
-                <el-button
-                  color="#62aef"
-                  style="border: 0"
-                  @click="visible = true"
-                  v-click-outside="onClickOutside"
-                >
-                  <el-row :gutter="20">
-                    <el-col :span="12">
-                      <span class="text-secondary fw-bold"
-                        ># {{ selectedTag }}</span
-                      >
-                    </el-col>
-                    <el-col :span="12">
-                      <el-icon class="text-white">
-                        <i-ep-arrow-down />
-                      </el-icon>
+          <el-row class="c-bg-secondary py-2">
+            <el-col :span="18">
+              <el-popover
+                placement="bottom"
+                :width="360"
+                :visible="visible"
+                trigger="click"
+                ref="popoverRef"
+              >
+                <div class="m-auto m-0 px-3">
+                  <el-row class="text-start">
+                    <el-col>
+                      <el-text class="fw-bold">Tags</el-text>
                     </el-col>
                   </el-row>
-                </el-button>
-              </template>
-            </el-popover>
-          </div>
+                  <el-row justify="space-between" class="mt-3">
+                    <el-col
+                      :span="8"
+                      v-for="tag in stickersTags"
+                      :key="tag.id"
+                      class="mt-2"
+                    >
+                      <el-text
+                        class="pointer"
+                        @click="handleTagSelect(tag.value)"
+                      >
+                        # {{ tag.value }}
+                      </el-text>
+                    </el-col>
+                  </el-row>
+                </div>
+                <template #reference>
+                  <el-button
+                    color="#62aef"
+                    style="border: 0"
+                    @click="visible = true"
+                    v-click-outside="onClickOutside"
+                  >
+                    <el-row :gutter="20">
+                      <el-col :span="12">
+                        <span class="text-secondary fw-bold"
+                          ># {{ selectedTag }}</span
+                        >
+                      </el-col>
+                      <el-col :span="12">
+                        <el-icon class="text-white">
+                          <i-ep-arrow-down />
+                        </el-icon>
+                      </el-col>
+                    </el-row>
+                  </el-button>
+                </template>
+              </el-popover>
+            </el-col>
+            <el-col :span="4">
+              <el-button type="primary">upload sticker</el-button>
+            </el-col>
+          </el-row>
           <stickers-list
             class="c-bg-secondary mt-1 py-2"
             :stickers="stickers"

@@ -1,22 +1,5 @@
 <template>
   <div>
-    <el-autocomplete
-      class="w-100"
-      v-model="keywords"
-      :fetch-suggestions="querySearch"
-      :placeholder="$t('tips.input')"
-      @select="handleSearch"
-      :trigger-on-focus="false"
-      size="large"
-      @input="showSuggestion"
-      @keyup.enter="handleSearch"
-    >
-      <template #append>
-        <el-icon size="20" color="white" @click="handleSearch"
-          ><i-ep-search
-        /></el-icon>
-      </template>
-    </el-autocomplete>
     <!-- 最近上传的文件 -->
     <div v-if="false">
       <el-row>
@@ -228,25 +211,25 @@
           <div style="width: 100%; height: 100%">Loading...</div>
         </template>
       </el-image>
-      <el-container
-        v-observe-visibility="{
-          callback: loadingData,
-        }"
-        class="mt-3"
-        style="
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          bottom: 5px;
-        "
-      >
-        <div v-if="hasData" class="m-auto">
-          <icon-loading />
-        </div>
-        <div v-else class="m-auto">
-          <span class="text-secondary">No more data!</span>
-        </div>
-      </el-container>
+      <!--      <el-container-->
+      <!--        v-observe-visibility="{-->
+      <!--          callback: loadingData,-->
+      <!--        }"-->
+      <!--        class="mt-3"-->
+      <!--        style="-->
+      <!--          position: absolute;-->
+      <!--          left: 50%;-->
+      <!--          transform: translateX(-50%);-->
+      <!--          bottom: 5px;-->
+      <!--        "-->
+      <!--      >-->
+      <!--        <div v-if="hasData" class="m-auto">-->
+      <!--          <icon-loading />-->
+      <!--        </div>-->
+      <!--        <div v-else class="m-auto">-->
+      <!--          <span class="text-secondary">No more data!</span>-->
+      <!--        </div>-->
+      <!--      </el-container>-->
     </div>
     <!-- 素材列表结束 -->
     <el-backtop :right="100" :bottom="100">
@@ -315,12 +298,7 @@
 
 <script setup lang="ts">
 import router from '@/router'
-import { getFeatured, autocomplete, search } from '@/api/tenor'
-import {
-  PageParamsModel,
-  ResponseObject,
-  PageResultModel,
-} from '@/api/tenor/model/tenorModel'
+import { ResponseObject } from '@/api/tenor/model/tenorModel'
 import { orderRecord } from '@/api/eth'
 import IconLoading from '@/components/icon-loading.vue'
 import { IconLike } from '@/assets/icon'
@@ -337,13 +315,11 @@ const materialList = ref()
 const _masonry = ref<Masonry>()
 
 // 图片文件获取及渲染
-const keywords = ref<string>('')
 const latestFiles = ref<ResponseObject[]>()
 const mostDownloadFiles = ref<object[]>()
 const fileList = ref<ResponseObject[]>([])
 const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
-const curPos = ref<string | number>('')
 
 const navigateTo = (name, params) => {
   router.push({
@@ -360,74 +336,8 @@ const layout = () => {
   })
 }
 
-/**
- * 获取素材列表
- *
- * 若keywords为空，则调用getFeatured接口，反之调用search接口
- */
-
-const getList = () => {
-  busy.value = true
-
-  const params = new PageParamsModel()
-  params.pos = curPos.value
-
-  let requestObj
-  if (keywords.value) {
-    params.q = keywords.value
-    requestObj = search(params)
-  } else {
-    requestObj = getFeatured(params)
-  }
-
-  requestObj
-    .then((res: PageResultModel) => {
-      curPos.value = res.next
-      hasData.value = res.results.length > 0
-      res.results.forEach((item) => {
-        fileList.value.push(item)
-      })
-
-      busy.value = false
-    })
-    .catch((e) => {
-      console.log(e)
-    })
-}
-
-// 搜索事件，每次搜索之前清空之前的列表状态
-const handleSearch = () => {
-  fileList.value = []
-  curPos.value = ''
-  hideSuggestion()
-  getList()
-}
-
-const hideSuggestion = () => {
-  document.querySelectorAll('.el-autocomplete__popper')[0].style.display =
-    'none'
-}
-
-const showSuggestion = () => {
-  document.querySelectorAll('.el-autocomplete__popper')[0].style.display =
-    'block'
-}
-
 const loadingData = (visible) => {
-  if (visible && hasData.value && !busy.value) getList()
-}
-
-// 获取搜索建议
-const querySearch = (queryString, callback) => {
-  let params: PageParamsModel = new PageParamsModel()
-  params.q = queryString
-  autocomplete(params).then((res) => {
-    const results = []
-    res['results'].map((item) => {
-      results.push({ value: item })
-    })
-    callback(results)
-  })
+  if (visible && hasData.value && !busy.value) console.log('loading...')
 }
 
 // eth交易
@@ -494,7 +404,7 @@ const transaction = async (amount: number) => {
 }
 
 onMounted(() => {
-  getList()
+  console.log('loading...')
   nextTick(() => {
     layout()
   })

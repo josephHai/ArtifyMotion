@@ -17,32 +17,45 @@ const routes: RouteRecordRaw[] = [
     },
   },
   /**
+   * 用户登录
+   */
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/artifyMotion/account/login.vue'),
+  },
+  /**
+   * 用户注册
+   */
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/artifyMotion/account/register.vue'),
+  },
+  /**
    * 用户中心
    */
   {
-    path: '/account',
-    name: 'account',
+    path: '/user',
+    name: '',
     component: () => import('@/views/artifyMotion/index.vue'),
     children: [
       {
-        path: 'login',
-        name: 'login',
-        component: () => import('@/views/artifyMotion/account/login.vue'),
-      },
-      {
-        path: 'register',
-        name: 'register',
-        component: () => import('@/views/artifyMotion/account/register.vue'),
-      },
-      {
-        path: 'home',
-        name: 'userHome',
-        component: () => import('@/views/artifyMotion/account/home.vue'),
-      },
-      {
-        path: 'profile',
-        name: 'profile',
-        component: () => import('@/views/artifyMotion/account/profile.vue'),
+        path: '',
+        name: '',
+        component: () => import('@/views/artifyMotion/user/index.vue'),
+        children: [
+          {
+            path: '',
+            name: 'userHome',
+            component: () => import('@/views/artifyMotion/user/home.vue'),
+          },
+          {
+            path: 'profile',
+            name: 'profile',
+            component: () => import('@/views/artifyMotion/user/profile.vue'),
+          },
+        ],
       },
     ],
   },

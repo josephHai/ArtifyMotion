@@ -5,25 +5,30 @@
       :rules="rules"
       ref="accountFormRef"
       label-width="auto"
-      style="max-width: 600px"
-      label-position="top"
     >
-      <el-form-item label="New Password" prop="password">
+      <el-form-item prop="password">
+        <template #label>
+          <span class="text-white font-bold mr-12">New Password</span>
+        </template>
         <el-input
+          class="h-10"
           v-model="form.password"
           type="password"
           placeholder="Please input password"
           clearable
+          show-password
         />
       </el-form-item>
       <el-form-item>
-        <el-button
-          class="m-auto"
-          style="width: 480px"
+        <template #label>
+          <span class="mr-12"></span>
+        </template>
+        <div
+          class="w-full h-10 flex justify-center items-center rounded-3xl opacity-60 cursor-pointer font-bold change-btn"
           @click="onSubmit(accountFormRef)"
-          round
-          >Change</el-button
         >
+          Change
+        </div>
       </el-form-item>
     </el-form>
   </div>
@@ -59,4 +64,17 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
 }
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+:deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  border-radius: 36px;
+  background: white;
+  outline: none;
+  :deep(input) {
+    outline: none !important;
+  }
+}
+.change-btn {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
+}
+</style>

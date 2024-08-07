@@ -1,4 +1,5 @@
 import router from '@/router'
+import { RouteParamsRaw } from 'vue-router'
 
 export const generateRandomString = (len?: number) => {
   if (!len) len = 8
@@ -33,7 +34,7 @@ export const url2filename = (url: string): string => {
   return pathName.split('/').pop() as string
 }
 
-export const navigateTo = (name, params) => {
+export const navigateTo = (name: string, params?: RouteParamsRaw) => {
   router.push({
     name,
     params,

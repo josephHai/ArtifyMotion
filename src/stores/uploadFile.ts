@@ -8,7 +8,7 @@ export const useUploadFileStore = defineStore('uploadFile', {
   }),
   getters: {},
   actions: {
-    async updateUploadFile(
+    updateUploadFile(
       newUrl: string,
       newLocalUrl: string,
       newFile: File

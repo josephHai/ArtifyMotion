@@ -1,17 +1,24 @@
 <template>
-  <div>
-    <el-row justify="space-between">
+  <div class="mt-5">
+    <el-row justify="space-between" style="min-height: 600px">
       <!-- 图片预览 -->
       <el-col
-        :span="10"
-        ref="sourceImageCanvasBox"
-        v-loading="trackLoading"
-        element-loading-text="handling..."
-        element-loading-background="rgba(88, 88, 88, 1)"
+        :span="11"
+        class="rounded-lg px-3 py-3"
+        style="background: rgba(35, 35, 35, 0.8); backdrop-filter: blur(2px)"
       >
-        <!-- 以gif形式渲染 -->
-        <div v-if="renderMethod === 'gif'">
-          <el-row>
+        <div class="w-full h-full" ref="sourceImageCanvasBox">
+          <el-row
+            class="align-items-center pointer text-white font-bold mb-5"
+            @click="router.back()"
+          >
+            <el-icon :size="24">
+              <i-ep-arrow-left />
+            </el-icon>
+            <div class="mx-1">Back</div>
+          </el-row>
+          <!-- 以gif形式渲染 -->
+          <div v-if="renderMethod === 'gif'">
             <gif-render
               v-if="sourceImageInfo.url"
               :box-width="boxWidth"
@@ -22,70 +29,115 @@
               :source-image-info="sourceImageInfo"
               :selected-sticker-url="selectedStickerUrl"
             />
-          </el-row>
-        </div>
-        <!-- 以gif形式渲染结束 -->
-        <!-- 以帧形式渲染 -->
-        <div v-if="renderMethod === 'frame' && trackResults">
-          <frame-render
-            v-if="sourceImageInfo.url"
-            :box-width="boxWidth"
-            :source-image-info="sourceImageInfo"
-            :selected-sticker-url="selectedStickerUrl"
-            :track-results="trackResults"
-            @fusion="handleFusion"
+          </div>
+          <!-- 以gif形式渲染结束 -->
+          <!-- 以帧形式渲染 -->
+          <div v-else-if="renderMethod === 'frame' && trackResults">
+            <frame-render
+              v-if="sourceImageInfo.url"
+              :box-width="boxWidth"
+              :source-image-info="sourceImageInfo"
+              :selected-sticker-url="selectedStickerUrl"
+              :track-results="trackResults"
+              @fusion="handleFusion"
+            />
+          </div>
+          <!-- 以帧形式渲染结束 -->
+          <div
+            v-else
+            class="w-full h-full c-bg-block"
+            v-loading="trackLoading"
+            element-loading-background="transparent"
+            :element-loading-svg="LocalLoadingSvg"
+            element-loading-svg-class="loading-svg"
           />
         </div>
-        <!-- 以帧形式渲染结束 -->
       </el-col>
       <!-- 图片预览结束 -->
       <!-- 操作面板 -->
-      <el-col :span="10">
+      <el-col
+        :span="12"
+        class="rounded-lg px-3 py-3"
+        style="background: #232323"
+      >
         <!-- 操作目录 -->
         <el-row>
-          <el-radio-group class="w-100 op-radio-group" v-model="op">
-            <el-row class="w-100">
+          <div class="w-full mb-3">
+            <el-row class="w-full bg-black rounded-3xl">
               <el-col v-if="renderMethod === 'gif'" :span="12">
-                <el-radio-button class="w-100" label="Caption" />
+                <div
+                  class="w-full flex justify-center items-center h-9 rounded-3xl cursor-pointer text-white"
+                  :class="{ 'radio-btn': op === 'Caption' }"
+                  @click="op = 'Caption'"
+                >
+                  <span class="font-medium">Caption</span>
+                </div>
               </el-col>
               <el-col :span="renderMethod === 'frame' ? 24 : 12">
-                <el-radio-button class="w-100" label="Stickers" />
+                <div
+                  class="w-full flex justify-center items-center h-9 rounded-3xl cursor-pointer text-white"
+                  :class="{ 'radio-btn': op === 'Stickers' }"
+                  @click="op = 'Stickers'"
+                >
+                  <span class="font-medium">Stickers</span>
+                </div>
               </el-col>
             </el-row>
-          </el-radio-group>
+          </div>
         </el-row>
         <!-- 操作目录结束 -->
         <!-- 详细操作项 -->
         <!-- Caption -->
-        <div v-if="op === 'Caption'" class="w-100 mt-1">
-          <div class="c-bg-secondary py-3">
+        <div v-if="op === 'Caption'" class="w-full mt-1">
+          <div>
             <!-- 要添加的文字输入框 -->
-            <el-row class="px-3 mt-3 w-100">
+            <el-row class="mt-3 w-full">
               <el-input
                 v-model="text"
-                :rows="2"
-                type="textarea"
                 placeholder="Enter your caption"
+                class="caption-input h-9"
               />
             </el-row>
             <!-- 要添加的文字输入框结束 -->
             <!-- 颜色选择 -->
-            <el-row class="px-3 mt-2 mx-0 w-100" justify="space-between">
-              <el-col v-for="color in colors" :key="color" :span="2">
+            <el-row class="mt-1 mx-auto w-full" justify="space-between">
+              <el-col :span="22">
+                <el-row class="w-full">
+                  <el-col
+                    v-for="(color, index) in colors"
+                    v-show="index < 12 || (index >= 12 && showMultiColors)"
+                    :key="index"
+                    :span="2"
+                    class="px-1 mt-2"
+                  >
+                    <div
+                      style="aspect-ratio: 1 / 1"
+                      :style="{ background: color }"
+                      :class="{ 'c-is-active': selectedColor === color }"
+                      class="pointer rounded-sm w-full"
+                      @click="selectedColor = color"
+                    />
+                  </el-col>
+                </el-row>
+              </el-col>
+              <el-col :span="2">
                 <div
-                  style="width: 100%; aspect-ratio: 1 / 1"
-                  :style="{ background: color }"
-                  :class="{ 'c-is-active': selectedColor === color }"
-                  class="pointer"
-                  @click="selectedColor = color"
-                />
+                  class="w-3/4 h-9 flex rounded-sm justify-center items-center px-1 mt-2 cursor-pointer"
+                  style="background: #2d2d2d"
+                  @click="showMultiColors = !showMultiColors"
+                >
+                  <i-ep-arrow-up v-if="showMultiColors" color="#A5A5A5" />
+                  <i-ep-arrow-down v-else color="#A5A5A5" />
+                </div>
               </el-col>
             </el-row>
             <!-- 颜色选择结束 -->
           </div>
           <!-- 字体选择 -->
-          <div class="px-3 py-5 w-100 c-bg-secondary">
-            <el-text class="text-white" size="small">Style</el-text>
+          <div class="py-5 w-full">
+            <div class="text-white opacity-40 font-bold ml-2 text-sm">
+              Style
+            </div>
             <el-row class="mt-2" :gutter="10">
               <el-col
                 v-for="fontFamily in fontFamilies"
@@ -94,7 +146,7 @@
                 class="mt-2"
               >
                 <div
-                  class="c-bg-secondary-light text-white text-center py-2 pointer w-100"
+                  class="text-white text-center py-2 pointer w-full rounded-lg font-bold secondary-box"
                   :style="{ 'font-family': fontFamily.name }"
                   :class="{
                     'c-is-active': selectedFontFamily === fontFamily.name,
@@ -109,24 +161,30 @@
           </div>
           <!-- 字体选择结束 -->
           <!-- 字体大小调整 -->
-          <div class="px-3 py-3 w-100 c-bg-secondary">
-            <el-text class="text-white" size="small">Font Size</el-text>
+          <div class="w-full">
+            <div class="text-white opacity-40 font-bold ml-2 text-sm">
+              Font Size
+            </div>
             <el-row class="mt-2" :gutter="10">
               <el-col :span="12">
-                <el-button
-                  class="w-100 bg-transparent border-secondary"
+                <div
+                  class="w-full h-10 flex justify-center items-center rounded-lg cursor-pointer secondary-box"
+                  style="color: #979797"
                   @click="textScale += 0.1"
-                  >+</el-button
                 >
+                  +
+                </div>
               </el-col>
               <el-col :span="12">
-                <el-button
-                  class="w-100 bg-transparent border-secondary"
+                <div
+                  class="w-full h-10 flex justify-center items-center rounded-lg cursor-pointer secondary-box"
+                  style="color: #979797"
                   @click="
                     textScale = textScale > 0.2 ? textScale - 0.1 : textScale
                   "
-                  >-</el-button
                 >
+                  -
+                </div>
               </el-col>
             </el-row>
           </div>
@@ -134,67 +192,69 @@
         </div>
         <!-- Caption END -->
         <!-- Stickers -->
-        <div v-if="op === 'Stickers'" class="w-100 mt-1">
-          <el-row class="c-bg-secondary py-2">
-            <el-col :span="18">
+        <div v-if="op === 'Stickers'" class="w-full mt-1">
+          <div class="py-2 flex justify-between">
+            <div
+              class="w-40 rounded-t-3xl cursor-pointer stickers-tag-input"
+              :class="{ 'rounded-b-3xl': !visible }"
+            >
               <el-popover
-                placement="bottom"
-                :width="360"
+                placement="bottom-end"
                 :visible="visible"
-                trigger="click"
+                :width="160"
                 ref="popoverRef"
+                :show-arrow="false"
+                popper-class="h-36 overflow-y-auto !rounded-b-3xl !border-0"
+                popper-style="background: #000000; opacity: 0.8; backdrop-filter: blur(6px);"
+                :offset="-10"
               >
-                <div class="m-auto m-0 px-3">
-                  <el-row class="text-start">
-                    <el-col>
-                      <el-text class="fw-bold">Tags</el-text>
-                    </el-col>
-                  </el-row>
-                  <el-row justify="space-between" class="mt-3">
-                    <el-col
-                      :span="8"
-                      v-for="tag in stickersTags"
-                      :key="tag.id"
-                      class="mt-2"
-                    >
-                      <el-text
-                        class="pointer"
+                <div class="m-auto px-3">
+                  <div class="mt-3">
+                    <div v-for="tag in stickersTags" :key="tag.id" class="mt-2">
+                      <div
+                        class="w-auto cursor-pointer border-white border-solid border rounded-3xl px-3 py-1 inline-block overflow-hidden text-ellipsis whitespace-nowrap"
+                        style="max-width: 120px"
                         @click="handleTagSelect(tag.value)"
                       >
-                        # {{ tag.value }}
-                      </el-text>
-                    </el-col>
-                  </el-row>
+                        <span class="w-full text-white font-light text-sm">
+                          # {{ tag.value }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <template #reference>
-                  <el-button
-                    color="#62aef"
-                    style="border: 0"
+                  <div
+                    class="w-full h-full rounded-3xl"
                     @click="visible = true"
                     v-click-outside="onClickOutside"
                   >
-                    <el-row :gutter="20">
-                      <el-col :span="12">
-                        <span class="text-secondary fw-bold"
+                    <div class="h-full flex justify-between items-center px-3">
+                      <div>
+                        <span class="text-white fw-bold"
                           ># {{ selectedTag }}</span
                         >
-                      </el-col>
-                      <el-col :span="12">
+                      </div>
+                      <div class="flex">
                         <el-icon class="text-white">
-                          <i-ep-arrow-down />
+                          <i-ep-search color="#999999" />
                         </el-icon>
-                      </el-col>
-                    </el-row>
-                  </el-button>
+                      </div>
+                    </div>
+                  </div>
                 </template>
               </el-popover>
-            </el-col>
-            <el-col :span="4">
-              <el-button type="primary">upload sticker</el-button>
-            </el-col>
-          </el-row>
+            </div>
+            <div class="w-1/4">
+              <div
+                class="w-full h-9 rounded-3xl flex justify-center items-center text-sm font-bold btn-bg"
+              >
+                upload sticker
+              </div>
+            </div>
+          </div>
           <stickers-list
-            class="c-bg-secondary mt-1 py-2"
+            class="mt-1 py-2"
             :stickers="stickers"
             @select="handleStickerSelect"
           ></stickers-list>
@@ -202,21 +262,23 @@
         <!-- Stickers End -->
         <!-- 详细操作项结束 -->
         <!-- 操作按钮  -->
-        <div class="c-bg-secondary mt-1 py-3">
+        <div class="mt-1">
           <el-row class="pt-5">
-            <el-button
-              class="w-100 c-btn-bg-cold border-0 text-white fw-bold"
+            <div
+              class="w-full h-10 rounded-3xl flex justify-center items-center text-sm font-bold cursor-pointer btn-bg"
               @click="handleDownload"
             >
               download
-            </el-button>
+            </div>
           </el-row>
           <el-row>
-            <el-button
-              class="w-100 bg-transparent border-0 text-white fw-bold"
+            <div
+              class="w-full h-9 rounded-3xl flex justify-center items-center text-sm underline cursor-pointer"
+              style="color: #e6ff21"
               @click="handleUpload"
-              >Upload to memefun</el-button
             >
+              Upload to memefun
+            </div>
           </el-row>
         </div>
         <!-- 操作按钮结束 -->
@@ -238,6 +300,8 @@ import { generateRandomString, url2filename } from '@/utils/common'
 import { useUploadFileStore } from '@/stores'
 import { gifToSprites } from '@/utils/gif.utils'
 import { PageParamsModel, ResponseObject } from '@/api/tenor/model/tenorModel'
+import router from '@/router'
+import { LocalLoadingSvg } from '@/assets/icon'
 
 // global variable
 const uploadFileStore = useUploadFileStore()
@@ -260,6 +324,7 @@ const text = ref<string>('')
 const textScale = ref<number>(1)
 const selectedColor = ref<string>('black')
 const selectedFontFamily = ref<string>('Arial')
+const showMultiColors = ref<boolean>(false)
 
 const colors = ref<string[]>([
   'white',
@@ -269,6 +334,15 @@ const colors = ref<string[]>([
   'blueviolet',
   'khaki',
   'fuchsia',
+  'cyan',
+  'cyan',
+  'cyan',
+  'cyan',
+  'cyan',
+  'cyan',
+  'cyan',
+  'cyan',
+  'cyan',
   'cyan',
 ])
 
@@ -438,7 +512,7 @@ const handleFusion = (result) => {
 }
 
 onMounted(() => {
-  boxWidth.value = sourceImageCanvasBox.value.$el.clientWidth
+  boxWidth.value = sourceImageCanvasBox.value?.clientWidth
   getFileInfo()
   getOptionalTags()
   getStickers()
@@ -446,16 +520,9 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
-.el-radio-group {
-  --el-border-radius-base: 0;
-}
-.op-radio-group {
-  --el-radio-button-checked-bg-color: var(--c-gradient-blue-start);
-  --el-radio-button-checked-border-color: var(--c-gradient-blue-start);
-
-  :deep(.el-radio-button__inner) {
-    width: 100%;
-  }
+.radio-btn {
+  border: 1px solid #e6ff21;
+  color: #e6ff21;
 }
 .el-textarea {
   --el-input-border-radius: 0;
@@ -468,14 +535,37 @@ onMounted(() => {
   }
 }
 .c-is-active {
-  border: 2px solid lightgreen;
+  border: 1px solid #e6ff21;
+  color: #e6ff21;
 }
 .c-not-active {
-  border: 2px solid transparent;
+  border: 1px solid transparent;
 }
 .uploader {
   :deep(.el-upload) {
     width: 100%;
   }
+}
+.btn-bg {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
+}
+.stickers-tag-input {
+  background: #000000;
+  opacity: 0.8;
+  backdrop-filter: blur(6px);
+}
+.caption-input {
+  :deep(.el-input__wrapper) {
+    background-color: white;
+  }
+  :deep(.el-input__wrapper input::placeholder) {
+    font-size: 12px;
+    color: #999999;
+    line-height: 22px;
+  }
+}
+.secondary-box {
+  background: #2d2d2d;
+  backdrop-filter: blur(2px);
 }
 </style>

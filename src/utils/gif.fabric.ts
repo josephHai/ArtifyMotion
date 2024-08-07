@@ -82,8 +82,10 @@ export async function fabricGif(
       const options = {
         fullscreen: true,
         lock: true,
-        text: 'generating...',
-        background: 'rgba(88, 88, 88, 0.8)',
+        text: '',
+        background: 'rgba(36, 36, 36, 0.8)',
+        spinner: 'el-icon-loading',
+        customClass: 'c-fs-loading',
       }
       const loadingInstance = ElLoading.service(options)
       gifEncoder.on('finished', (blob) => {

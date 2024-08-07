@@ -1,331 +1,192 @@
 <template>
   <div>
-    <!-- 最近上传的文件 -->
-    <div v-if="false">
-      <el-row>
-        <el-icon color="#6a2c70" size="24">
-          <i-ep-clock />
-        </el-icon>
-        <span class="h5 fw-semibold text-white mx-2">Latest</span>
-      </el-row>
-      <el-row :gutter="5">
-        <el-col
-          :span="4"
-          v-for="file in latestFiles"
-          :key="file['fid']"
-          class="image-container"
-        >
-          <el-image
-            class="rounded-1"
-            style="width: 100%; height: 200px"
-            fit="cover"
-            :src="file.media_formats.gif.preview || file.media_formats.gif.url"
-          />
-          <div class="overlay text-center">
-            <el-row :gutter="40" style="z-index: 100">
-              <el-col :span="6">
-                <el-tooltip
-                  effect="dark"
-                  content="edit"
-                  placement="top"
-                  :show-arrow="false"
-                  :offset="2"
-                >
-                  <el-icon
-                    size="large"
-                    color="white"
-                    class="pointer"
-                    @click="navigateTo('edit', { id: file['fid'] })"
-                  >
-                    <i-ep-edit />
-                  </el-icon>
-                </el-tooltip>
-              </el-col>
-              <el-col :span="6">
-                <el-tooltip
-                  effect="dark"
-                  content="creation"
-                  placement="top"
-                  :show-arrow="false"
-                  :offset="2"
-                >
-                  <el-icon
-                    size="large"
-                    color="white"
-                    class="pointer"
-                    @click="navigateTo('replace', { id: file['fid'] })"
-                  >
-                    <i-ep-promotion />
-                  </el-icon>
-                </el-tooltip>
-              </el-col>
-            </el-row>
-          </div>
-        </el-col>
-      </el-row>
-    </div>
-    <!-- 最近上传的文件结束 -->
-    <!-- 最多次下载的文件 -->
-    <div class="mt-5" v-if="false">
-      <el-row>
-        <el-icon color="#b83b5e" size="24">
-          <i-ep-download />
-        </el-icon>
-        <span class="h5 fw-semibold text-white mx-2">Most Download</span>
-      </el-row>
-      <el-row :gutter="5">
-        <el-col
-          :span="4"
-          v-for="file in mostDownloadFiles"
-          :key="file['fid']"
-          class="image-container"
-        >
-          <el-image
-            class="rounded-1"
-            style="width: 100%; height: 200px"
-            fit="cover"
-            :src="file['media']['preview']['url']"
-          />
-          <div class="overlay text-center">
-            <el-row :gutter="40" style="z-index: 100">
-              <el-col :span="6">
-                <el-button
-                  @click="navigateTo('creation', { id: file['fid'] })"
-                ></el-button>
-              </el-col>
-            </el-row>
-          </div>
-        </el-col>
-      </el-row>
-    </div>
-    <!-- 最多次下载的文件结束 -->
     <!-- 文件列表 -->
-    <div
-      class="mt-5 m-auto"
-      v-if="false"
-      element-loading-background="rgba(0,0,0,0)"
-    >
-      <el-row>
-        <el-icon color="#f08a5d" size="24">
-          <i-ep-files />
-        </el-icon>
-        <span class="h5 fw-semibold text-white mx-2">Lists</span>
-      </el-row>
-      <el-container>
-        <el-row :gutter="10">
-          <el-col
-            class="pointer image-container"
-            v-for="file in fileList"
-            :key="file.id"
-            :span="file['span']"
-          >
-            <el-image
-              class="rounded-1"
-              fit="cover"
-              style="width: 100%; height: 314px"
-              :src="file.media_formats.tinygif.url"
-            />
-            <div class="overlay text-center">
-              <el-row :gutter="40" style="z-index: 100">
-                <el-col :span="6">
-                  <el-tooltip
-                    effect="dark"
-                    content="Creation"
-                    placement="top"
-                    :show-arrow="false"
-                    :offset="2"
-                  >
-                    <el-icon
-                      size="large"
-                      color="white"
-                      class="pointer"
-                      @click="navigateTo('creation', { id: file.id })"
-                    >
-                      <i-ep-edit />
-                    </el-icon>
-                  </el-tooltip>
-                </el-col>
-                <el-col :span="6">
-                  <el-tooltip
-                    effect="dark"
-                    content="Tips"
-                    placement="top"
-                    :show-arrow="false"
-                    :offset="2"
-                  >
-                    <el-icon
-                      size="large"
-                      color="white"
-                      class="pointer"
-                      @click="handleTransaction(file['walletAddress'])"
-                    >
-                      <i-ep-wallet />
-                    </el-icon>
-                  </el-tooltip>
-                </el-col>
-                <el-col :span="6">
-                  <el-tooltip
-                    effect="dark"
-                    content="Like"
-                    placement="top"
-                    :show-arrow="false"
-                    :offset="2"
-                  >
-                    <el-icon size="large">
-                      <icon-like width="24" height="24" />
-                    </el-icon>
-                  </el-tooltip>
-                </el-col>
-              </el-row>
-            </div>
-          </el-col>
-        </el-row>
-      </el-container>
-      <el-container
-        v-observe-visibility="{
-          callback: loadingData,
-        }"
-        class="mt-3"
+    <div class="m-auto mt-5" element-loading-background="rgba(0,0,0,0)">
+      <div class="flex justify-center items-center mb-20">
+        <curve :text="keywords ? 'Search Results' : 'Featured GIFs'" />
+      </div>
+      <el-carousel
+        v-if="!keywords"
+        type="card"
+        height="314px"
+        :autoplay="false"
+        indicator-position="none"
+        @change="handleCarouselChange"
+        arrow="always"
       >
-        <div v-if="hasData" class="m-auto">
-          <icon-loading />
-        </div>
-        <div v-else class="m-auto">
-          <span class="text-secondary">No more data!</span>
-        </div>
-      </el-container>
+        <el-carousel-item
+          v-for="(file, index) in fileList.slice(0, 5)"
+          :key="file.id"
+          class="rounded-xl image-loading-bg"
+          @click="navigateTo('creation', { id: file.id })"
+        >
+          <el-image
+            class="w-full rounded-xl"
+            fit="cover"
+            style="height: 314px"
+            :src="file.media_formats.gif.url"
+          >
+            <template #placeholder>
+              <div class="w-full"></div>
+            </template>
+            <template #error>
+              <div class="w-full"></div>
+            </template>
+          </el-image>
+          <div
+            v-if="index === carouselActiveIndex"
+            class="absolute w-full h-1/4 bottom-0 flex items-center px-5 overlay"
+          >
+            <div class="flex">
+              <div>
+                <img
+                  class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                  src="../../assets/img/t.png"
+                  alt=""
+                />
+              </div>
+              <div class="ml-4">
+                <div class="text-white text-base font-bold">Tenor</div>
+                <div class="text-gray-500 text-xs">@Tenor</div>
+              </div>
+            </div>
+          </div>
+        </el-carousel-item>
+      </el-carousel>
     </div>
     <!-- 文件列表结束 -->
     <!-- 素材列表 -->
     <div ref="materialList" class="mt-5 overflow-hidden">
-      <el-image
-        v-for="file in fileList"
+      <div
+        class="material-item"
+        v-for="file in fileList.slice(5)"
         :key="file.id"
-        class="material-item mb-3 rounded-1"
-        :src="file.media_formats.tinygif.url"
-        :style="{ height: file.media_formats.tinygif.dims[1] + 'px' }"
         @click="navigateTo('creation', { id: file.id })"
-        :alt="file.content_description"
       >
-        <template #placeholder>
-          <div style="width: 100%; height: 100%">Loading...</div>
-        </template>
-      </el-image>
-      <!--      <el-container-->
-      <!--        v-observe-visibility="{-->
-      <!--          callback: loadingData,-->
-      <!--        }"-->
-      <!--        class="mt-3"-->
-      <!--        style="-->
-      <!--          position: absolute;-->
-      <!--          left: 50%;-->
-      <!--          transform: translateX(-50%);-->
-      <!--          bottom: 5px;-->
-      <!--        "-->
-      <!--      >-->
-      <!--        <div v-if="hasData" class="m-auto">-->
-      <!--          <icon-loading />-->
-      <!--        </div>-->
-      <!--        <div v-else class="m-auto">-->
-      <!--          <span class="text-secondary">No more data!</span>-->
-      <!--        </div>-->
-      <!--      </el-container>-->
+        <el-image
+          :key="file.id"
+          class="absolute w-full rounded-xl"
+          :src="file.media_formats.gif.url"
+          :style="{ height: file.media_formats.tinygif.dims[1] + 'px' }"
+        >
+          <template #placeholder>
+            <div class="w-full h-full image-loading-bg"></div>
+          </template>
+          <template #error>
+            <div class="w-full h-full image-loading-bg"></div>
+          </template>
+        </el-image>
+        <div
+          class="absolute w-full h-full bottom-0 opacity-0 hover:opacity-100 cursor-pointer overlay"
+        >
+          <div class="absolute right-6 top-1">
+            <icon-binding class="absolute w-5 h-5" />
+          </div>
+          <div class="absolute bottom-3 left-3">
+            <div class="flex">
+              <div>
+                <img
+                  class="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                  src="../../assets/img/t.png"
+                  alt=""
+                />
+              </div>
+              <div class="ml-4">
+                <div class="text-white text-base font-bold">Tenor</div>
+                <div class="text-gray-500 text-xs">@Tenor</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      v-observe-visibility="{
+        callback: loadingData,
+      }"
+      class="mt-3 flex justify-center"
+    >
+      <div v-if="hasData" class="m-auto">
+        <icon-loading />
+      </div>
+      <div v-else class="m-auto">
+        <span class="text-white">No more data!</span>
+      </div>
     </div>
     <!-- 素材列表结束 -->
-    <el-backtop :right="100" :bottom="100">
-      <div class="text-secondary fw-bold" style="font-size: 1.2rem">
+    <el-backtop :bottom="100">
+      <div
+        class="w-full h-full rounded-full image-loading-bg flex justify-center items-center font-bold"
+        style="color: #e8ff27"
+      >
         <i-ep-top />
       </div>
     </el-backtop>
-    <c-modal v-model="loadingVisible" width="30%" lock :show-close="false">
-      <template #title>
-        <div class="text-center">
-          <icon-modal-loader />
-        </div>
-      </template>
-      <template #body>
-        <div class="text-white text-center mt-3">
-          <span v-if="metamaskAction === 'logging'"
-            >Connecting to your wallet...</span
-          >
-          <span v-if="metamaskAction === 'transaction'">transaction...</span>
-        </div>
-      </template>
-    </c-modal>
-    <c-modal v-model="transactionModalVisible" width="30%">
-      <template #title>
-        <div class="text-center text-white">Amount</div>
-      </template>
-      <template #body>
-        <el-row class="mt-4 mx-3" justify="space-around" :gutter="5">
-          <el-col :span="5">
-            <el-button
-              class="border border-secondary text-white"
-              @click="transaction(1)"
-              text
-              >1eth</el-button
-            >
-          </el-col>
-          <el-col :span="5">
-            <el-button
-              class="border border-secondary text-white"
-              @click="transaction(2)"
-              text
-              >2eth</el-button
-            >
-          </el-col>
-          <el-col :span="5">
-            <el-button
-              class="border border-secondary text-white"
-              @click="transaction(5)"
-              text
-              >5eth</el-button
-            >
-          </el-col>
-          <el-col :span="5">
-            <el-button
-              class="border border-secondary text-white"
-              @click="transaction(10)"
-              text
-              >10eth</el-button
-            >
-          </el-col>
-        </el-row>
-      </template>
-    </c-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import router from '@/router'
-import { ResponseObject } from '@/api/tenor/model/tenorModel'
-import { orderRecord } from '@/api/eth'
-import IconLoading from '@/components/icon-loading.vue'
-import { IconLike } from '@/assets/icon'
-import { ElMessage } from 'element-plus'
-import CModal from '@/components/c-modal.vue'
-import { IconModalLoader } from '@/assets/icon/loaders'
-import { Metamask } from '@/utils/metamask.utils'
-import web3 from 'web3'
+import { navigateTo } from '@/utils/common'
+import { useRoute } from 'vue-router'
+import {
+  PageParamsModel,
+  ResponseObject,
+  PageResultModel,
+} from '@/api/tenor/model/tenorModel'
+import { IconBinding, IconLoading } from '@/assets/icon'
+import { Curve } from '@/assets/icon'
 import Masonry from 'masonry-layout'
 import { nextTick } from 'vue'
+import { getFeatured, search } from '@/api/tenor'
 
-const loadingVisible = ref(false)
 const materialList = ref()
 const _masonry = ref<Masonry>()
+const route = useRoute()
 
 // 图片文件获取及渲染
-const latestFiles = ref<ResponseObject[]>()
-const mostDownloadFiles = ref<object[]>()
+const carouselActiveIndex = ref<Number>(0)
 const fileList = ref<ResponseObject[]>([])
+const curPos = ref<string | number>('')
 const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
+const keywords = ref(route.query.q)
 
-const navigateTo = (name, params) => {
-  router.push({
-    name,
-    params,
-  })
+/**
+ * 获取素材列表
+ *
+ * 若keywords为空，则调用getFeatured接口，反之调用search接口
+ */
+const getList = () => {
+  busy.value = true
+
+  const params = new PageParamsModel()
+  params.pos = curPos.value
+
+  let requestObj
+  if (keywords.value) {
+    params.q = keywords.value as string
+    requestObj = search(params)
+  } else {
+    requestObj = getFeatured(params)
+  }
+
+  requestObj
+    .then((data: PageResultModel) => {
+      curPos.value = data.next
+      hasData.value = data.results.length > 0
+      data.results.forEach((item) => {
+        fileList.value.push(item)
+      })
+
+      busy.value = false
+    })
+    .catch((e) => {
+      console.log(e)
+    })
+}
+
+const handleCarouselChange = (cur: Number) => {
+  carouselActiveIndex.value = cur
 }
 
 const layout = () => {
@@ -336,75 +197,11 @@ const layout = () => {
   })
 }
 
-const loadingData = (visible) => {
-  if (visible && hasData.value && !busy.value) console.log('loading...')
-}
-
-// eth交易
-const transactionModalVisible = ref(false)
-const metamaskAction = ref<string>('')
-const metamaskInstance = Metamask.getInstance()
-let account: string
-const toWalletAddress = ref<string>('')
-
-const handleTransaction = async (walletAddress) => {
-  metamaskAction.value = 'logging'
-  loadingVisible.value = true
-  account = await metamaskInstance.getAccount()
-
-  loadingVisible.value = false
-  transactionModalVisible.value = true
-  toWalletAddress.value = walletAddress
-}
-
-const transaction = async (amount: number) => {
-  transactionModalVisible.value = false
-  metamaskAction.value = 'transaction'
-  loadingVisible.value = true
-  const amountWei = web3.utils.toWei(amount.toString(), 'ether')
-  window.ethereum
-    ?.request({
-      method: 'eth_sendTransaction',
-      params: [
-        {
-          from: account,
-          to: toWalletAddress.value,
-          value: parseInt(amountWei).toString(16),
-        },
-      ],
-    })
-    .then(async (txHash) => {
-      const chainId = await metamaskInstance.getChainId()
-      const data = new FormData()
-      data.append('chainId', chainId)
-      data.append('fromAddress', account)
-      data.append('toAddress', toWalletAddress.value)
-      data.append('value', amountWei)
-      data.append('txHash', txHash as string)
-      await orderRecord(data)
-    })
-    .catch((err) => {
-      if (err.code === 4001) {
-        ElMessage({
-          type: 'info',
-          message: 'transaction is denied!',
-          duration: 3 * 1000,
-        })
-      } else if (err.code === -32602) {
-        ElMessage({
-          type: 'error',
-          message: 'Something went wrong, please contact the administrator!',
-          duration: 3 * 1000,
-        })
-      }
-    })
-    .finally(() => {
-      loadingVisible.value = false
-    })
+const loadingData = (visible: boolean) => {
+  if (visible && hasData.value && !busy.value) getList()
 }
 
 onMounted(() => {
-  console.log('loading...')
   nextTick(() => {
     layout()
   })
@@ -419,40 +216,21 @@ onUpdated(() => {
 .image-container {
   position: relative;
 }
+
 .overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.image-container:hover .overlay {
-  opacity: 1;
-}
-
-:deep(.el-input-group__append) {
-  height: 50px;
-  cursor: pointer;
-  border-radius: 0 5px 5px 0;
   background: linear-gradient(
-    45deg,
-    var(--c-gradient-btn-bg-cold-start),
-    var(--c-gradient-btn-bg-cold-end)
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.9) 100%
   );
-}
-
-:deep(.el-input__wrapper) {
-  height: 50px;
 }
 
 .material-item {
   width: calc(100% / 4 - 10px);
+}
+
+:deep(.el-carousel__arrow) {
+  font-size: 1.2rem;
+  color: #e8ff27;
 }
 </style>

@@ -4,50 +4,44 @@
       width: boxWidth + 'px',
       height: boxHeight ? boxHeight + 'px' : 'auto',
     }"
-    v-loading="renderLoading"
-    element-loading-text="rendering..."
-    element-loading-background="rgba(88, 88, 88, 1)"
   >
-    <el-row>
-      <canvas id="source-image-canvas-frame" width="100%"></canvas>
-    </el-row>
-    <el-row
-      justify="space-around"
-      class="mt-3 px-3 py-3 rounded-3 c-bg-secondary"
-    >
+    <el-row justify="space-between" class="mt-3 py-3">
       <!-- 大小位置调整 -->
       <el-col :span="16">
         <el-row :gutter="10">
           <el-col :span="4">
-            <el-button
-              class="w-100 bg-transparent border-secondary"
+            <div
+              class="w-full h-full flex justify-center items-center bg-transparent rounded-lg op-btn"
               @click="handleOpClick('+')"
-              ><icon-search-plus width="16" height="16"
-            /></el-button>
+            >
+              <icon-search-plus width="16" height="16" class="op-icon" />
+            </div>
           </el-col>
           <el-col :span="4">
-            <el-button
-              class="w-100 bg-transparent border-secondary"
+            <div
+              class="w-full h-full flex justify-center items-center bg-transparent rounded-lg op-btn"
               @click="handleOpClick('-')"
-              ><icon-search-minus width="16" height="16"
-            /></el-button>
-          </el-col>
-          <el-col :span="8">
-            <el-button
-              class="w-100 bg-transparent border border-secondary"
-              @click="showPositionOptions = !showPositionOptions"
-              text
-              ><icon-switch width="16" height="16" />
-              &nbsp;Position
-            </el-button>
-          </el-col>
-          <el-col :span="8">
-            <el-button
-              class="w-100 bg-transparent border border-secondary"
-              text
             >
-              <el-col :span="16" class="text-white">
-                <div>{{ playSpeed }}x</div>
+              <icon-search-minus width="16" height="16" class="op-icon" />
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div
+              class="w-full h-full flex justify-center items-center bg-transparent rounded-lg op-btn"
+              style="color: #979797"
+              @click="showPositionOptions = !showPositionOptions"
+            >
+              <icon-switch width="16" height="16" class="op-icon" />
+              <span class="text-sm ml-2">Position</span>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div
+              class="w-full h-full flex justify-center items-center bg-transparent rounded-lg op-btn"
+              style="color: #979797"
+            >
+              <el-col :span="8" :offset="8">
+                <div class="text-sm">{{ playSpeed }}x</div>
               </el-col>
               <el-col :span="8">
                 <div style="margin-bottom: -4px">
@@ -57,66 +51,63 @@
                   <i-ep-caret-bottom @click="changeSpeed('-')" />
                 </div>
               </el-col>
-            </el-button>
+            </div>
           </el-col>
         </el-row>
         <el-row v-if="showPositionOptions">
           <!-- 位置调整 -->
-          <el-row class="mt-3">
+          <el-row class="mt-3 w-full">
             <!-- 位置调整 up -->
-            <el-row class="w-100">
+            <el-row class="w-full">
               <el-col :span="8" :offset="8">
-                <el-button
-                  class="m-auto text-secondary fw-bold w-75 bg-transparent border-secondary"
+                <div
+                  class="m-auto fw-bold w-5/6 h-9 rounded-3xl flex justify-center items-center op-btn"
                   @click="handleOpClick('up')"
-                  round
                 >
-                  <i-ep-arrow-up />
-                </el-button>
+                  <i-ep-arrow-up class="op-icon" />
+                </div>
               </el-col>
             </el-row>
             <!-- 位置调整 up结束 -->
             <!-- 位置调整 left flip right -->
-            <el-row el-row class="w-100 mt-3">
+            <el-row el-row class="w-full mt-3">
               <el-col :span="8">
-                <el-button
-                  class="m-auto text-secondary fw-bold w-75 bg-transparent border-secondary"
+                <div
+                  class="m-auto fw-bold w-5/6 h-9 rounded-3xl flex justify-center items-center op-btn"
                   @click="handleOpClick('left')"
-                  round
                 >
-                  <i-ep-arrow-left />
-                </el-button>
+                  <i-ep-arrow-left class="op-icon" />
+                </div>
               </el-col>
               <el-col :span="8">
-                <el-button
-                  class="m-auto text-secondary fw-bold w-75 bg-transparent border-secondary"
+                <div
+                  class="m-auto fw-bold w-5/6 h-9 rounded-xl flex justify-center items-center op-btn"
+                  style="color: #979797"
                   @click="handleOpClick('flip')"
-                  round
                 >
-                  <icon-flip width="16" height="16" /> Flip
-                </el-button>
+                  <icon-flip width="16" height="16" class="op-icon" />
+                  <div class="text-sm">Flip</div>
+                </div>
               </el-col>
               <el-col :span="8">
-                <el-button
-                  class="m-auto text-secondary fw-bold w-75 bg-transparent border-secondary"
+                <div
+                  class="m-auto fw-bold w-5/6 h-9 rounded-3xl flex justify-center items-center op-btn"
                   @click="handleOpClick('right')"
-                  round
                 >
-                  <i-ep-arrow-right />
-                </el-button>
+                  <i-ep-arrow-right class="op-icon" />
+                </div>
               </el-col>
             </el-row>
             <!-- 位置调整 left flip right结束 -->
             <!-- 位置调整 down -->
-            <el-row el-row class="w-100 mt-3">
+            <el-row el-row class="w-full mt-3">
               <el-col :span="8" :offset="8">
-                <el-button
-                  class="m-auto text-secondary fw-bold w-75 bg-transparent border-secondary"
+                <div
+                  class="m-auto fw-bold w-5/6 h-9 rounded-3xl flex justify-center items-center op-btn"
                   @click="handleOpClick('down')"
-                  round
                 >
-                  <i-ep-arrow-down />
-                </el-button>
+                  <i-ep-arrow-down class="op-icon" />
+                </div>
               </el-col>
             </el-row>
             <!-- 位置调整 down结束 -->
@@ -126,14 +117,17 @@
       </el-col>
       <!-- 大小位置调整结束 -->
       <el-col :span="8" class="text-end">
-        <el-button
-          class="c-btn-bg-warm border-0 m-auto text-white fw-bold w-75"
+        <div
+          class="m-auto h-8 rounded-3xl text-black flex justify-center items-center w-3/4 cursor-pointer edit-btn"
           @click="convertGif('fusion')"
         >
-          <icon-edit width="24" height="24" class="mx-2" />
-          Edit
-        </el-button>
+          <icon-edit width="24" height="24" class="mx-2 edit-icon" />
+          <span class="font-bold">Edit</span>
+        </div>
       </el-col>
+    </el-row>
+    <el-row>
+      <canvas id="source-image-canvas-frame" width="100%"></canvas>
     </el-row>
   </div>
 </template>
@@ -276,7 +270,7 @@ const addRect = (item: FaceBox) => {
     id: rectId,
     fill: item.id == selectedFaceId ? 'rgba(88, 88, 88, 0.8)' : 'transparent',
     stroke: 'white',
-    strokeWidth: 2,
+    strokeWidth: 3,
     selectable: false,
     hoverCursor: 'pointer',
   })
@@ -393,7 +387,7 @@ const stickerModify = (
     (item.height + item.height * (stickerStyle.sizeRate - 1)) * scale
   )
   sticker.on('mousedown', () => {
-    selectedFaceId = item.id as number
+    selectedFaceId = Number(item.id)
   })
   sticker.flipX = stickerStyle.flip
   return sticker
@@ -416,7 +410,7 @@ const canvasRefresh = () => {
  *
  * @param op 对sticker调整操作，包含大小缩放、位置偏移、翻转
  */
-const handleOpClick = (op) => {
+const handleOpClick = (op: string) => {
   const item = props.trackResults![selectedFaceId].stickerStyle
   const sizeRate = item.sizeRate ? item.sizeRate : 1
 
@@ -439,7 +433,7 @@ const handleOpClick = (op) => {
   }
 }
 
-const changeSpeed = (op) => {
+const changeSpeed = (op: string) => {
   if (op === '+' && playSpeed.value < 2) {
     playSpeed.value = parseFloat((playSpeed.value + 0.1).toFixed(1))
     return
@@ -580,5 +574,24 @@ onUnmounted(() => {
 }
 .el-loading-spinner .circular {
   display: none !important;
+}
+.op-btn {
+  border: 1px solid #666666;
+  cursor: pointer;
+}
+.op-icon {
+  :deep(path) {
+    fill: #979797;
+  }
+}
+.edit-icon {
+  :deep(path) {
+    fill: black;
+    stroke: black;
+    stroke-width: 20;
+  }
+}
+.edit-btn {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
 }
 </style>

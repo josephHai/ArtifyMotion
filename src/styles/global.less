@@ -48,3 +48,57 @@ body {
   background-position: 0 0, 20px 20px;
   background-size: 40px 40px;
 }
+
+.image-loading-bg {
+  background: #242424;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #2d2d2d;
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.c-fs-loading {
+  .el-loading-spinner {
+    background-image: url('../assets/icon/logo/logo-dark.svg') !important;
+    background-repeat: no-repeat;
+    background-size: 250px 100px;
+    height: 100px;
+    width: 100%;
+    background-position: center;
+    top: 40%;
+    left: 50%;
+    animation: wave 1s infinite cubic-bezier(0.42, 0, 0.58, 1);
+  }
+
+  .el-loading-spinner .circular {
+    display: none !important;
+  }
+
+  @keyframes wave {
+    0% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(20px);
+    }
+    100% {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+}

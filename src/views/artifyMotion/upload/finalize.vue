@@ -1,72 +1,78 @@
 <template>
-  <div class="w-75 m-auto">
-    <el-row>
-      <el-col :span="12">
-        <el-card class="py-4 border-0 card-left">
+  <div class="w-75 m-auto mt-5">
+    <el-row justify="space-between">
+      <el-col :span="8">
+        <div class="pt-5 px-4 card">
           <el-row
-            class="align-items-center pointer text-white"
+            class="items-center pointer text-white font-bold"
             @click="router.back()"
           >
             <el-icon :size="24">
               <i-ep-arrow-left />
             </el-icon>
-            <el-text class="text-white fw-bold mx-1">Back</el-text>
+            <div class="mx-1">Back</div>
           </el-row>
-          <el-row
-            class="mt-3 align-items-center text-white bg-black"
-            justify="space-between"
-          >
+          <el-row class="mt-3 items-center text-white" justify="space-between">
             <el-col :span="3">
-              <el-image class="rounded-1" fit="fill" :src="sourceUrl" />
+              <el-image class="rounded-lg" fit="fill" :src="sourceUrl" />
             </el-col>
             <el-col :span="18">
-              <el-text
-                truncated
-                class="text-white fw-semibold"
-                style="font-size: 0.6rem"
+              <div
+                class="text-white overflow-hidden text-ellipsis whitespace-nowrap"
+                style="font-size: 14px; line-height: 36px"
               >
                 {{ imageName }}
-              </el-text>
+              </div>
             </el-col>
-            <el-col :span="2" class="text-center"
-              ><el-icon :size="20"><i-ep-picture-filled /></el-icon
-            ></el-col>
-          </el-row>
-          <el-row>
-            <el-image class="w-100" :src="sourceUrl" />
-          </el-row>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card class="py-4 border-0 card-right">
-          <el-row>
-            <el-text class="fw-bold text-white" size="large">Add Info</el-text>
-          </el-row>
-          <el-row class="mt-4 align-items-center">
-            <el-icon class="c-text-gray"><i-ep-lock /></el-icon>
-            <el-text class="mx-1 c-text-gray" size="small">Visibility</el-text>
+            <el-col :span="2">
+              <el-icon :size="24">
+                <i-ep-picture-filled class="opacity-40" />
+              </el-icon>
+            </el-col>
           </el-row>
           <el-row class="mt-3">
-            <el-col :span="8">
+            <el-image class="w-full rounded-md" :src="sourceUrl" />
+          </el-row>
+        </div>
+      </el-col>
+      <el-col :span="15">
+        <div class="pt-5 px-4 card">
+          <el-row>
+            <div class="font-bold text-white text-xl">Add Info</div>
+          </el-row>
+          <el-row class="mt-4 align-items-center">
+            <el-icon class="text-white opacity-40 text-xl"
+              ><i-ep-lock
+            /></el-icon>
+            <div class="text-white opacity-40 font-bold ml-2 text-sm">
+              Visibility
+            </div>
+          </el-row>
+          <el-row class="mt-3">
+            <el-col :span="10">
               <btn-switch :on="visibility" @click="visibility = !visibility" />
             </el-col>
           </el-row>
           <el-row class="mt-4" :gutter="20">
             <el-col :span="1"
-              ><el-icon class="c-text-gray"><i-ep-collection-tag /></el-icon
+              ><el-icon class="text-white opacity-40 text-xl"
+                ><i-ep-collection-tag /></el-icon
             ></el-col>
             <el-col :span="10">
-              <el-text class="fw-bold c-text-gray">Add Tags</el-text>
+              <div class="text-white opacity-40 font-bold ml-2 text-sm">
+                Add Tags
+              </div>
             </el-col>
           </el-row>
           <el-row class="mt-3">
-            <el-input v-model="tag" class="tags-box">
-              <template #append>
-                <el-button @click="addTag">
-                  <el-icon color="white">
-                    <i-ep-plus />
-                  </el-icon>
-                </el-button>
+            <el-input v-model="tag" class="tags-box" placeholder="Add tags">
+              <template #suffix>
+                <div
+                  @click="addTag"
+                  class="relative left-2 cursor-pointer tag-suffix"
+                >
+                  <div class="text-black font-bold">+</div>
+                </div>
               </template>
             </el-input>
             <el-row>
@@ -74,6 +80,7 @@
                 v-for="tag in tags"
                 :key="tag"
                 class="my-3 tag-box px-3"
+                style="background-color: #2d2d2d"
                 closable
                 @close="handleClose"
                 size="large"
@@ -83,49 +90,52 @@
               </el-tag>
             </el-row>
             <el-row>
-              <el-text
-                class="mt-2 w-75 c-text-gray"
+              <div
+                class="mt-2 text-white opacity-40 text-xs"
                 style="font-size: 0.8rem; word-break: keep-all"
+                v-show="!tags.length"
               >
                 Tags help find your content later. Separate with commas to add
                 multiple tags.
-              </el-text>
+              </div>
             </el-row>
           </el-row>
           <el-row class="mt-4" :gutter="20">
             <el-col :span="1">
-              <el-icon class="c-text-gray">
+              <el-icon class="text-white opacity-40 font-bold text-xl">
                 <i-ep-football />
               </el-icon>
             </el-col>
             <el-col :span="10">
-              <el-text class="fw-bold c-text-gray">Source URL</el-text>
+              <div class="text-white opacity-40 font-bold ml-2 text-sm">
+                Source URL
+              </div>
             </el-col>
           </el-row>
-          <el-input v-model="imageName" class="mt-3" maxlength="30">
+          <el-input v-model="imageName" class="mt-3 tags-box" maxlength="30">
             <template #prefix>
               <el-icon>
                 <i-ep-picture-filled />
               </el-icon>
             </template>
           </el-input>
-          <el-row class="mt-5">
-            <el-button
-              class="w-100 text-white c-btn-bg-cold border-0 fw-bolder"
+          <el-row class="mt-8">
+            <div
+              class="w-full rounded-3xl py-2 text-center cursor-pointer btn-bg"
               @click="handleUpload"
             >
-              Upload
-            </el-button>
+              <div class="text-black font-bold">Upload</div>
+            </div>
           </el-row>
-          <el-row class="mt-1">
+          <!-- <el-row class="mt-1">
             <el-button
               class="w-100 text-white border-0 mt-2 fw-bold"
               style="background: rgba(33, 33, 33, 1)"
               @click="handleMint"
               >Upload & Mint</el-button
             >
-          </el-row>
-        </el-card>
+          </el-row> -->
+        </div>
       </el-col>
     </el-row>
     <c-modal
@@ -137,7 +147,7 @@
     >
       <template #title v-if="mintLoading || getAccountLoading">
         <div class="text-center">
-          <icon-modal-loader />
+          <icon-loading />
         </div>
       </template>
       <template #title v-else>
@@ -171,14 +181,10 @@
 import BtnSwitch from '@/components/btn-switch.vue'
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
-import { uploadFile, getFileDetails } from '@/api/file'
-import { orderRecord } from '@/api/eth'
+import { uploadFile } from '@/api/file'
 import { ElMessage } from 'element-plus'
-import Web3 from 'web3'
-import abi from '@/assets/MemeFunAbi.json'
-import { Metamask } from '@/utils/metamask.utils'
 import CModal from '@/components/c-modal.vue'
-import { IconModalLoader } from '@/assets/icon/loaders'
+import { IconLoading } from '@/assets/icon'
 
 // 文件上传
 const tag = ref<string>('')
@@ -226,60 +232,10 @@ const upload = async () => {
 }
 
 // 文件url铸造
-const metamaskInstance = Metamask.getInstance()
 const getAccountLoading = ref(false)
 const mintLoading = ref(false)
 const mintModalShow = ref(false)
 const transactionResult = ref()
-
-const handleMint = async () => {
-  mintModalShow.value = true
-
-  // 连接用户钱包
-  getAccountLoading.value = true
-  const account = await metamaskInstance.getAccount()
-  getAccountLoading.value = false
-
-  mintLoading.value = true
-  // 获取文件url
-  const url = await upload().then(async (res) => {
-    const { result } = await getFileDetails({ fid: res['result']['fid'] })
-    return result['media']['src']['url']
-  })
-  // 加载合约
-  const contract = await loadContract()
-  transactionResult.value = await contract.methods
-    .mint(account as any, url as any)
-    .send({ from: account })
-    .then(async (res) => {
-      const chainId = await metamaskInstance.getChainId()
-      const data = new FormData()
-      data.append('chainId', chainId)
-      data.append('fromAddress', res.from)
-      data.append('toAddress', res.to)
-      data.append('value', '0')
-      data.append('txHash', res.transactionHash)
-      await orderRecord(data)
-      return res
-    })
-    .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: 'transaction is denied!',
-        duration: 3 * 1000,
-      })
-      router.back()
-      return undefined
-    })
-  if (!transactionResult.value) mintModalShow.value = false
-  mintLoading.value = false
-}
-
-const loadContract = async () => {
-  const web3 = new Web3(window.ethereum)
-  const address = '0xf8CB65a57ef864A784401c0110c4Ce8dA582A2D0'
-  return new web3.eth.Contract(abi, address)
-}
 
 const handleModalClose = (done) => {
   done()
@@ -295,30 +251,28 @@ onMounted(() => {
 </script>
 
 <style scoped lang="less">
-@card-min-height: 800px;
+@card-min-height: 600px;
 
-.card-left {
-  background: rgba(18, 18, 18, 1);
+.card {
+  background: rgba(35, 35, 35, 0.8);
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
   min-height: @card-min-height;
 }
-.card-right {
-  background: rgba(33, 33, 33, 1);
-  min-height: @card-min-height;
-}
-.c-text-gray {
-  color: rgba(166, 166, 166, 1);
-}
+
 .tags-box {
-  :deep(.el-input-group__append) {
-    height: 40px;
-    cursor: pointer;
-    border-radius: 0 5px 5px 0;
-    background: linear-gradient(
-      45deg,
-      var(--c-gradient-btn-bg-warm-start),
-      var(--c-gradient-btn-bg-warm-end)
-    );
+  height: 38px;
+  :deep(.el-input__wrapper) {
+    background-color: white;
   }
+}
+
+.tag-suffix {
+  width: 36px;
+  height: 36px;
+  font-size: 36px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f5ffa7 0%, #e6ff21 100%);
 }
 
 .tag-box {
@@ -329,5 +283,9 @@ onMounted(() => {
   :deep(.el-tag__close) {
     color: white;
   }
+}
+
+.btn-bg {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
 }
 </style>

@@ -1,80 +1,99 @@
 <template>
-  <div class="pt-5">
-    <el-card style="width: 480px" class="m-auto mt-5">
-      <div class="h4 fw-bolder mt-3 mb-5">Sign up to memefun</div>
-      <el-form
-        :model="form"
-        :rules="rules"
-        ref="accountFormRef"
-        label-width="auto"
-        style="max-width: 600px"
-        label-position="top"
-      >
-        <el-form-item label="Username" prop="username">
-          <el-input
-            v-model="form.username"
-            placeholder="Please input username"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item label="Password" prop="password">
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="Please input password"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item label="Email" prop="email">
-          <el-input
-            v-model="form.email"
-            placeholder="Please input email"
-            clearable
-          />
-        </el-form-item>
-        <el-form-item label="Address" prop="address">
-          <el-input v-model="form.address" placeholder="Please input address" />
-        </el-form-item>
-        <el-form-item label="EmailCode" prop="emailCode">
-          <el-input
-            v-model="form.emailCode"
-            placeholder="Please input emailCode"
-            style="width: 320px"
-          ></el-input>
-          <el-button v-show="!isCount" @click="acquire" style="width: 100px"
-            >auth</el-button
+  <div id="register-form" class="w-full h-screen flex items-center">
+    <div class="w-2/3">
+      <div class="w-full flex flex-col items-center">
+        <div>
+          <icon-logo :width="300" />
+        </div>
+        <div class="w-1/3 mt-10">
+          <el-form
+            :model="form"
+            :rules="rules"
+            ref="accountFormRef"
+            label-width="auto"
+            label-position="top"
           >
-          <el-button v-show="isCount" style="width: 100px" disabled
-            >{{ countTime }}s</el-button
-          >
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            class="m-auto"
-            style="width: 480px"
-            @click="onSubmit(accountFormRef)"
-            round
-            >Sign up</el-button
-          >
-        </el-form-item>
-        <el-form-item>
-          <div class="text-secondary">
-            Already have an account?
+            <el-form-item prop="username">
+              <el-input
+                class="h-12"
+                v-model="form.username"
+                placeholder="Username"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+                class="h-12"
+                v-model="form.password"
+                type="password"
+                placeholder="Password"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item prop="email">
+              <el-input
+                class="h-12"
+                v-model="form.email"
+                placeholder="Email"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item prop="address">
+              <el-input
+                class="h-12"
+                v-model="form.address"
+                placeholder="Address"
+              />
+            </el-form-item>
+            <el-form-item prop="emailCode">
+              <el-input
+                class="h-12"
+                v-model="form.emailCode"
+                placeholder="EmailCode"
+              >
+                <template #suffix>
+                  <div
+                    v-show="!isCount"
+                    class="rounded-3xl flex justify-center items-center w-16 h-10 text-black font-bold auth-btn"
+                    @click="acquire"
+                  >
+                    Auth
+                  </div>
+                  <div v-show="isCount">{{ countTime }}</div>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <div
+                class="w-full h-12 flex justify-center items-center rounded-3xl opacity-60 cursor-pointer font-bold sign-in-btn"
+                @click="onSubmit(accountFormRef)"
+              >
+                Sign up
+              </div>
+            </el-form-item>
+          </el-form>
+          <div class="text-center text-xs" style="color: #e6ff21">
+            Already have an account?&nbsp;&nbsp;
             <span
-              class="text-decoration-underline fw-bolder pointer"
-              @click="navigateTo('login', '')"
+              class="underline font-bold cursor-pointer"
+              @click="navigateTo('login')"
               >Sign in</span
             >
           </div>
-        </el-form-item>
-      </el-form>
-    </el-card>
+        </div>
+      </div>
+    </div>
+    <div class="w-1/3 h-screen overflow-x-hidden pl-3">
+      <right-area />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
 import { navigateTo } from '@/utils/common'
+import { IconLogo } from '@/assets/icon'
+import rightArea from './right-area.vue'
 
 interface AccountForm {
   username: string
@@ -89,11 +108,11 @@ const accountFormRef = ref<FormInstance>()
 const form = reactive<AccountForm>({
   username: '',
   password: '',
-  profile: undefined,
+  profile: {},
   email: '',
   address: '',
   emailCode: '',
-} as AccountForm)
+})
 
 // 获取验证码计时
 const isCount = ref<boolean>(false)
@@ -136,4 +155,20 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
 }
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+:deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  border-radius: 36px;
+  color: white;
+  outline: none;
+  :deep(input) {
+    outline: none !important;
+  }
+}
+.sign-in-btn {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
+}
+.auth-btn {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
+}
+</style>

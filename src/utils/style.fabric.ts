@@ -1,11 +1,11 @@
 import { fabric } from 'fabric'
-import errorUrl from '@/assets/icon/error.png?url'
+import trash from '@/assets/icon/trash.svg?url'
 
 export class memeFabric {
   trashImg: HTMLImageElement
   constructor() {
     this.trashImg = document.createElement('img')
-    this.trashImg.src = errorUrl
+    this.trashImg.src = trash
   }
 
   addDeleteControl = (
@@ -14,11 +14,12 @@ export class memeFabric {
     callback: Function
   ) => {
     instance.set({
-      cornerSize: 30,
-      borderDashArray: [10, 5],
-      borderColor: 'rgba(88, 88, 88, 1)',
-      cornerStrokeColor: 'transparent',
-      strokeWidth: 0,
+      cornerSize: 24,
+      borderColor: 'rgba(230, 255, 33, 0.4)',
+      borderScaleFactor: 5,
+      borderDashArray: [5, 5],
+      cornerStyle: 'circle',
+      cornerColor: '#E6FF21',
     })
     instance.setControlsVisibility({
       tl: false, //top-left
@@ -28,7 +29,7 @@ export class memeFabric {
       mr: false, //middle-right
       bl: false, // bottom-left
       mb: false, //middle-bottom
-      br: true, //bottom-right,
+      br: false, //bottom-right,
       mtr: false, // rotate
     })
     let instanceToCanvasRight =
@@ -36,15 +37,17 @@ export class memeFabric {
     instance.controls.deleteControl = new fabric.Control({
       x: instanceToCanvasRight > 30 ? 0.5 : -0.5,
       y: -0.5,
-      offsetX: 0,
-      offsetY: 0,
+      offsetX: instance.cornerSize! / 2,
+      offsetY: instance.cornerSize! / 2,
       cursorStyle: 'pointer',
       //@ts-ignore
       mouseUpHandler: callback,
       render: (ctx, left, top) => {
+        const size = instance.cornerSize!
         ctx.save()
         ctx.translate(left, top)
-        ctx.drawImage(this.trashImg, -12, 0, 24, 24)
+        ctx.drawImage(this.trashImg, -size / 2, -size / 2, size, size)
+        ctx.fillStyle = 'pink'
         ctx.restore()
       },
     })

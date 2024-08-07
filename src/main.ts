@@ -6,7 +6,7 @@ import router from '@/router'
 // 全局样式
 import '@/styles/mixin.less'
 import 'element-plus/dist/index.css'
-import '@/styles/bootstrap.css'
+import '@/styles/style.css'
 import '@/styles/var.less'
 import '@/styles/global.less'
 

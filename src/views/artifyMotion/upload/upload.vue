@@ -1,37 +1,40 @@
 <template>
   <div
-    class="w-75 m-auto"
+    class="w-75 m-auto card mt-12 pb-16"
     v-loading="parseUrlLoading"
-    element-loading-text="Parsing the URL..."
-    element-loading-background="rgba(88, 88, 88, 0.8)"
+    element-loading-background="rgba(36, 36, 36, 0.8)"
+    element-loading-spinner="el-icon-loading"
+    element-loading-custom-class="c-fs-loading"
   >
-    <el-card class="c-card-bg text-white border-0">
-      <div>
+    <div>
+      <div class="mt-5">
         <el-row>
-          <div class="card-title m-auto">{{ $t('message.upload') }}</div>
+          <div class="m-auto">
+            <curve :width="360" text="Upload" custom-style="color: #E7FF25;" />
+          </div>
         </el-row>
         <el-row class="mt-1">
           <el-col :span="12" :offset="6" class="text-center">
-            <el-text size="small" class="card-description text-white">
+            <div class="card-description">
               You can upload File from local or website.
-            </el-text>
+            </div>
           </el-col>
         </el-row>
       </div>
-      <div class="card-body">
-        <el-row class="text-center c-card-bg-light pt-3">
+      <div class="w-5/6 mx-auto mt-5">
+        <el-row class="text-center pt-3 pb-10 card-item">
           <el-col>
-            <el-icon :size="40" color="white">
+            <el-icon :size="40" color="black">
               <i-ep-picture-filled />
             </el-icon>
           </el-col>
           <el-col class="mt-2">
-            <span class="fw-bold">GIF</span>
+            <span class="font-bold text-black card-item-title">GIF</span>
           </el-col>
           <el-col class="mt-2">
-            <el-text class="text-white" size="small"
-              >Upload a GIF, MP4, JPEG or PNG.</el-text
-            >
+            <div class="text-black card-item-description">
+              Upload a GIF, MP4, JPEG or PNG.
+            </div>
           </el-col>
           <el-col class="mt-3" style="height: 36px">
             <el-upload
@@ -40,28 +43,29 @@
               :show-file-list="false"
               :on-change="handleUpload"
             >
-              <el-button
-                class="w-100 c-btn-bg-warm text-white fw-bold border-0"
-                style="height: 40px"
-                >Select File</el-button
-              >
+              <div class="font-bold text-black w-full rounded-3xl select-btn">
+                Select File
+              </div>
             </el-upload>
           </el-col>
         </el-row>
-        <el-row class="mt-5 c-card-bg-light px-3 py-3">
+        <el-row
+          class="mt-5 px-3 py-3 text-center rounded-lg"
+          style="background-color: #e6ff21"
+        >
           <el-col>
-            <el-text class="text-white fw-bold">Any URL</el-text>
+            <div class="font-bold text-black card-item-title">Any URL</div>
           </el-col>
           <el-col>
-            <el-text class="text-white" size="small">
+            <div class="mt-2 text-black card-item-description">
               We support media URLs from GIPHY, YouTube, Vimeo, & many others!
-            </el-text>
+            </div>
           </el-col>
           <el-col>
             <el-input
               v-model="parseUrl"
               :placeholder="$t('tips.input')"
-              class="searchBox"
+              class="mt-3 search-box"
               size="large"
               @input="parseUrlChange"
             >
@@ -69,7 +73,7 @@
           </el-col>
         </el-row>
       </div>
-    </el-card>
+    </div>
     <router-view />
   </div>
 </template>
@@ -79,6 +83,7 @@ import router from '@/router'
 import { useUploadFileStore } from '@/stores'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Curve } from '@/assets/icon'
 
 const parseUrl = ref<string>('')
 const uploadFileStore = useUploadFileStore()
@@ -159,28 +164,59 @@ onMounted(() => {
 </script>
 
 <style scoped lang="less">
-.card-header {
-  margin-top: 3%;
-}
-.card-title {
-  font-size: 2rem;
-  text-align: center;
-  font-weight: bold;
+.card {
+  background: rgba(18, 18, 18, 0.8);
+  box-shadow: inset 0px 0px 103px 0px rgba(227, 255, 0, 0.42);
+  border-radius: 10px;
+  border: 1px solid #e3ff00;
+  backdrop-filter: blur(2px);
 }
 .card-description {
-  word-break: keep-all;
+  font-family: GeezaPro;
+  font-size: 15px;
+  color: #e6ff21;
+  line-height: 20px;
+  font-style: normal;
+  opacity: 40%;
 }
-.searchBox {
-  margin-top: 20px;
+.card-item {
+  background: linear-gradient(180deg, #f5ffa7 0%, #e6ff21 100%);
+  border-radius: 10px;
 }
-.card-body {
-  width: 90%;
-  margin: 3% auto auto;
-  padding-bottom: 2%;
+.card-item-title {
+  font-family: DINPro, DINPro;
+  font-size: 22px;
+  line-height: 28px;
+  font-style: normal;
+}
+.card-item-description {
+  font-family: Helvetica;
+  font-size: 13px;
+  line-height: 16px;
+  font-style: normal;
 }
 .uploader {
   :deep(.el-upload) {
-    width: 100%;
+    width: 36%;
+  }
+}
+.select-btn {
+  height: 50px;
+  border: 1px solid #000000;
+  font-family: Helvetica, Helvetica;
+  font-size: 18px;
+  line-height: 50px;
+  font-style: normal;
+}
+.search-box {
+  :deep(.el-input__wrapper) {
+    background-color: white;
+  }
+  :deep(.el-input__wrapper input::placeholder) {
+    text-align: center;
+    font-size: 16px;
+    color: #999999;
+    line-height: 22px;
   }
 }
 </style>

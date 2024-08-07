@@ -1,22 +1,20 @@
 <template>
   <div>
     <div
-      class="btn-switch-box row justify-content-center text-center rounded-5 mx-0"
+      class="flex overflow-hidden text-white bg-black text-center rounded-3xl mx-0 relative cursor-pointer"
     >
       <div
-        :class="[
-          { 'on-box c-btn-bg-warm': props.on },
-          { 'off-box c-btn-bg-cold': !props.on },
-        ]"
+        :class="[{ 'on-box': props.on }, { 'off-box': !props.on }]"
+        class="h-full w-1/2 left-0 top-0 rounded-3xl absolute"
       ></div>
       <div
-        class="col-6 rounded-5 py-2 font-style"
+        class="basis-1/2 py-2 text-sm font-bold relative text-center font-style"
         :class="{ 'text-black': props.on }"
       >
         Public
       </div>
       <div
-        class="col-6 rounded-5 py-2 font-style"
+        class="basis-1/2 py-2 text-sm font-bold relative text-center font-style"
         :class="{ 'text-black': !props.on }"
       >
         Private
@@ -44,30 +42,16 @@ const props = defineProps({
   color: white;
 }
 .on-box {
-  border-radius: inherit;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) 0s;
-  width: 50%;
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
 }
 .off-box {
-  border-radius: inherit;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s;
-  width: 50%;
   transform: translate3d(100%, 0, 0);
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
 }
 .font-style {
-  font-size: 0.6rem;
-  font-weight: bold;
   pointer-events: none;
-  position: relative;
-  text-align: center;
   text-shadow: rgba(0, 0, 0, 0.25) 0 2px 5px;
   transition: color 0.3s ease-out 0s;
 }

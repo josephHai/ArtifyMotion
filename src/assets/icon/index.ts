@@ -1,21 +1,23 @@
-import IconLoading from '@/assets/icon/loading.svg'
-import IconTrash from '@/assets/icon/trash.svg'
-import IconUser from '@/assets/icon/user.svg'
-import IconSearchPlus from '@/assets/icon/search-plus.svg'
-import IconSearchMinus from '@/assets/icon/search-minus.svg'
-import IconEdit from '@/assets/icon/edit.svg'
-import IconFlip from '@/assets/icon/tool_hFlip.svg'
-import IconSwitch from '@/assets/icon/switches-2.svg'
-import IconLike from '@/assets/icon/like.svg'
+import IconSearchPlus from './search-plus.svg'
+import IconSearchMinus from './search-minus.svg'
+import IconEdit from './edit.svg'
+import IconFlip from './tool_hFlip.svg'
+import IconSwitch from './switches-2.svg'
+import IconBinding from './icon-binding.svg'
+import Curve from './curve.vue'
+import IconLogo from './logo/logo.vue'
+import { IconLoading, LocalLoadingSvg, LocalLoading } from './loaders'
 
 export {
-  IconLoading,
-  IconTrash,
-  IconUser,
   IconSearchPlus,
   IconSearchMinus,
   IconEdit,
   IconFlip,
   IconSwitch,
-  IconLike,
+  IconBinding,
+  Curve,
+  IconLogo,
+  IconLoading,
+  LocalLoadingSvg,
+  LocalLoading,
 }

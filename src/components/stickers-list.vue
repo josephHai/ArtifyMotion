@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="rounded-1">
-      <el-scrollbar height="360px" class="c-bg-block">
+      <el-scrollbar height="330px" class="c-bg-block">
         <el-row :gutter="20" class="px-3">
           <el-col
             :span="6"
@@ -16,7 +16,18 @@
                 class="pointer"
                 :src="sticker.media.src.url"
                 @click="handleStickerSelect"
-              />
+              >
+                <template #placeholder>
+                  <local-loading class="animate-spin" width="18" />
+                </template>
+                <template #error>
+                  <div class="flex justify-center items-center">
+                    <el-icon size="24" color="gray">
+                      <i-ep-picture />
+                    </el-icon>
+                  </div>
+                </template>
+              </el-image>
             </el-row>
           </el-col>
         </el-row>
@@ -26,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { LocalLoading } from '@/assets/icon'
+
 defineComponent({
   name: 'StickersList',
 })

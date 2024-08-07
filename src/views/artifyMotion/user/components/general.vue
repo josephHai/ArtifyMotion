@@ -1,35 +1,43 @@
 <template>
-  <div>
+  <div class="mt-10">
     <el-form
       :model="form"
       :rules="rules"
       ref="accountFormRef"
       label-width="auto"
-      style="max-width: 600px"
-      label-position="top"
     >
-      <el-form-item label="Username" prop="username">
+      <el-form-item prop="username">
+        <template #label>
+          <span class="text-white font-bold mr-12">Username</span>
+        </template>
         <el-input
+          class="h-10"
           v-model="form.username"
           placeholder="Please input username"
           clearable
         />
       </el-form-item>
-      <el-form-item label="Email" prop="email">
+      <el-form-item prop="email">
+        <template #label>
+          <span class="text-white font-bold mr-12">Email</span>
+        </template>
         <el-input
+          class="h-10"
           v-model="form.email"
           placeholder="Please input email"
           clearable
         />
       </el-form-item>
       <el-form-item>
-        <el-button
-          class="m-auto"
-          style="width: 480px"
+        <template #label>
+          <span class="mr-12"></span>
+        </template>
+        <div
+          class="w-full h-10 flex justify-center items-center rounded-3xl opacity-60 cursor-pointer font-bold sign-in-btn"
           @click="onSubmit(accountFormRef)"
-          round
-          >Save Change</el-button
         >
+          Change
+        </div>
       </el-form-item>
     </el-form>
   </div>
@@ -68,4 +76,17 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
 }
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+:deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  border-radius: 36px;
+  background: white;
+  outline: none;
+  :deep(input) {
+    outline: none !important;
+  }
+}
+.sign-in-btn {
+  background: linear-gradient(90deg, #faffab 0%, #e7ff24 100%);
+}
+</style>

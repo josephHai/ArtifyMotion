@@ -1,8 +1,6 @@
 <template>
   <div>
     <router-view :key="key" />
-    <el-divider />
-    <div class="footer">©2023 memefun.xyz</div>
   </div>
 </template>
 

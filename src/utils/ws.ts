@@ -21,7 +21,7 @@ const service = (
       ElMessage({
         message: 'failed to connect websocket.Please connect administrators.',
         type: 'error',
-        duration: 5 * 1000,
+        duration: 3 * 1000,
       })
       console.log(e)
       reject(new Error('WebSocket connection error'))

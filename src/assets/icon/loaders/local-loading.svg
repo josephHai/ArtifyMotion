@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="36px" viewBox="-25 0 50 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>logo</title>
+    <g id="outer-container" fill="none" fill-rule="evenodd">
+        <g id="group-fun">
+            <path id="path-u" fill="#3B3B3B" d="M -17.3 14.5 C -17.3 22.8 -10.6 29.5 -2.3 29.5 C 6 29.5 12.7 22.8 12.7 14.5 L 18.7 14.5 C 18.7 26.1 9.3 35.5 -2.3 35.5 C -13.9 35.5 -23.3 26.1 -23.3 14.5 L -17.3 14.5 Z M -23.7 4.5 L -17.7 4.5 L -17.7 10 L -23.7 10 L -23.7 4.5 Z M 13.3 4.5 L 19.4 4.5 L 19.4 10 L 13.3 10 L 13.3 4.5 Z">
+            </path>
+        </g>
+    </g>
+</svg>

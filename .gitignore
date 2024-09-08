@@ -6,6 +6,7 @@ dist-ssr
 coverage
 stats.html
 .idea
+.vscode
 
 # 包管理器
 # package-lock.json

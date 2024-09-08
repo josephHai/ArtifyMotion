@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from '@/App.vue'
 import router from '@/router'
+import './permission'
 
 // 全局样式
 import '@/styles/mixin.less'

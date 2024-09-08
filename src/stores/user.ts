@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { setToken, removeToken } from '@/utils/auth'
+import { UserInfoModel } from '@/api/mgr/model/userModel'
 
 const useUserInfoStore = defineStore('userInfo', {
   state: () => ({
@@ -12,6 +14,7 @@ const useUserInfoStore = defineStore('userInfo', {
       return new Promise((resolve) => {
         this.uid = uid
         this.token = token
+        setToken(token)
         resolve('Login successful!')
       })
     },
@@ -20,8 +23,12 @@ const useUserInfoStore = defineStore('userInfo', {
         this.uid = Number(null)
         this.token = ''
         this.userInfo = {}
+        removeToken()
         resolve('Logout successful!')
       })
+    },
+    setUserInfo(userInfo: UserInfoModel): void {
+      this.userInfo = userInfo
     },
   },
 })

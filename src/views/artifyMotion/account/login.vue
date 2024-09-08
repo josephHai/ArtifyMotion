@@ -107,8 +107,10 @@ import RightArea from './right-area.vue'
 import { login, fetchUserInfo } from '@/api/mgr/user'
 import { LoginResponse } from '@/api/mgr/model/result'
 import { useUserInfoStore } from '@/stores'
+import { useRoute, useRouter } from 'vue-router'
 
-const userInfoStore = useUserInfoStore()
+const route = useRoute()
+const router = useRouter()
 
 interface AccountForm {
   email: string
@@ -132,11 +134,13 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      handleLogin()
+      await handleLogin()
       ElMessage({
         message: 'Login successful!',
         type: 'success',
       })
+      const redirect = route.query.redirect || '/'
+      router.push(redirect)
     } else {
       console.log('error submit', fields)
     }
@@ -146,11 +150,10 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
 const handleLogin = async () => {
   const loginData = (await login(form)) as unknown as LoginResponse
   const { uid, token } = loginData.result
-  userInfoStore.uid = uid
-  userInfoStore.token = token
+  const userInfoStore = useUserInfoStore()
+  userInfoStore.login(uid, token)
   const userInfo = await fetchUserInfo()
-  userInfoStore.userInfo = userInfo
-  console.log(userInfo)
+  userInfoStore.setUserInfo(userInfo)
 }
 
 // 验证码

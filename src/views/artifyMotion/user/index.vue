@@ -11,7 +11,7 @@
       <div class="ml-5">
         <div class="mb-4">
           <span class="text-white font-bold text-xl">{{
-            userStore.userInfo.username
+            userStore.info.username
           }}</span>
         </div>
         <div

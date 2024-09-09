@@ -44,7 +44,12 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { updateUserInfo } from '@/api/mgr/user'
+import { useUserStore } from '@/stores'
+import { UserInfoModel } from '@/api/mgr/model/userModel'
+
+const userStore = useUserStore()
 
 interface AccountForm {
   username: string
@@ -61,14 +66,24 @@ const rules = reactive<FormRules<AccountForm>>({
   username: [
     { required: true, message: 'Please input username', trigger: 'blur' },
   ],
-  email: [{ required: true, message: 'Please input Email', trigger: 'blur' }],
+  email: [
+    { required: true, message: 'Please input Email', trigger: 'blur' },
+    {
+      type: 'email',
+      message: 'Please input a valid email address',
+      trigger: ['blur', 'change'],
+    },
+  ],
 })
 
 const onSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log('submit!')
+      await updateUserInfo(form)
+      userStore.updateInfo(form as UserInfoModel)
+      ElMessage.success('Update success!')
+      formEl.resetFields()
     } else {
       console.log('error submit', fields)
     }

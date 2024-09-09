@@ -3,14 +3,14 @@ import { setToken, removeToken } from '@/utils/auth'
 import { UserInfoModel } from '@/api/mgr/model/userModel'
 import { login, fetchUserInfo } from '@/api/mgr/user'
 import { FetchUserInfoResponse, LoginResponse } from '@/api/mgr/model/result'
-import { navigateTo } from '@/utils/common'
+import router from '@/router'
 
 const useUserStore = defineStore('userInfo', {
   persist: true,
   state: () => ({
     uid: Number(null),
     token: '',
-    userInfo: {} as UserInfoModel,
+    info: {} as UserInfoModel,
   }),
   getters: {},
   actions: {
@@ -26,7 +26,7 @@ const useUserStore = defineStore('userInfo', {
         this.token = token
         const fetchUserInfoRes =
           (await fetchUserInfo()) as unknown as FetchUserInfoResponse
-        this.userInfo = fetchUserInfoRes.result
+        this.info = fetchUserInfoRes.result
       } catch (error) {
         console.error('Login failed:', error)
       }
@@ -34,9 +34,12 @@ const useUserStore = defineStore('userInfo', {
     logout(): void {
       this.uid = Number(null)
       this.token = ''
-      this.userInfo = {} as UserInfoModel
+      this.info = {} as UserInfoModel
       removeToken()
-      navigateTo('/')
+      router.push('/')
+    },
+    updateInfo(userInfo: UserInfoModel): void {
+      this.info = { ...this.info, ...userInfo }
     },
   },
 })

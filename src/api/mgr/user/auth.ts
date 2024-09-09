@@ -18,3 +18,11 @@ export function register(data: RegisterModel) {
     data,
   })
 }
+
+export function sendEmailCode(email: string) {
+  return request({
+    url: 'sendEmailCode',
+    method: 'post',
+    data: { email },
+  })
+}

@@ -30,6 +30,15 @@
                 clearable
               />
             </el-form-item>
+            <el-form-item prop="confirmPassword">
+              <el-input
+                class="h-12"
+                v-model="form.confirmPassword"
+                type="password"
+                placeholder="Confirm Password"
+                clearable
+              />
+            </el-form-item>
             <el-form-item prop="email">
               <el-input
                 class="h-12"
@@ -53,13 +62,13 @@
               >
                 <template #suffix>
                   <div
-                    v-show="!isCount"
-                    class="rounded-3xl flex justify-center items-center w-16 h-10 text-black font-bold auth-btn"
-                    @click="acquire"
+                    class="rounded-3xl flex justify-center items-center w-36 h-10 text-black font-bold cursor-pointer auth-btn"
+                    :class="{ 'opacity-60': isCount }"
+                    @click="onSendEmailCode"
                   >
-                    Auth
+                    <span v-if="!isCount">Get Auth Code</span>
+                    <span v-else>Resend in {{ countTime }}s</span>
                   </div>
-                  <div v-show="isCount">{{ countTime }}</div>
                 </template>
               </el-input>
             </el-form-item>
@@ -90,15 +99,16 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { navigateTo } from '@/utils/common'
 import { IconLogo } from '@/assets/icon'
 import rightArea from './right-area.vue'
+import { register, sendEmailCode } from '@/api/mgr/user'
 
 interface AccountForm {
   username: string
   password: string
-  profile: object
+  confirmPassword: string
   email: string
   address: string
   emailCode: string
@@ -108,7 +118,7 @@ const accountFormRef = ref<FormInstance>()
 const form = reactive<AccountForm>({
   username: '',
   password: '',
-  profile: {},
+  confirmPassword: '',
   email: '',
   address: '',
   emailCode: '',
@@ -137,7 +147,31 @@ const rules = reactive<FormRules<AccountForm>>({
   password: [
     { required: true, message: 'Please input password', trigger: 'blur' },
   ],
-  email: [{ required: true, message: 'Please input Email', trigger: 'blur' }],
+  confirmPassword: [
+    {
+      required: true,
+      message: 'Please confirm password',
+      trigger: 'blur',
+    },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== form.password) {
+          callback('Passwords do not match')
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
+  email: [
+    { required: true, message: 'Please input Email', trigger: 'blur' },
+    {
+      type: 'email',
+      message: 'Please input a valid email address',
+      trigger: ['blur', 'change'],
+    },
+  ],
   emailCode: [
     { required: true, message: 'Please input auth code', trigger: 'blur' },
   ],
@@ -145,13 +179,29 @@ const rules = reactive<FormRules<AccountForm>>({
 
 const onSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log('submit!')
+      try {
+        await register(form)
+        ElMessage.success('Register success, please sign in')
+        navigateTo('login')
+      } catch (e) {
+        console.log(e)
+      }
     } else {
       console.log('error submit', fields)
     }
   })
+}
+
+const onSendEmailCode = async () => {
+  try {
+    await sendEmailCode(form.email)
+    ElMessage.success('Email code sent, please check your email')
+    acquire()
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 

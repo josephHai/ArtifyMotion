@@ -39,6 +39,7 @@
     "js-cookie": "^3.0.5",
     "masonry-layout": "^4.2.2",
     "pinia": "^2.0.33",
+    "pinia-plugin-persistedstate": "^4.0.0",
     "react": "18.2.0",
     "react-i18next": "^13.2.2",
     "unplugin-icons": "^0.16.5",

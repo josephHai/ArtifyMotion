@@ -52,11 +52,21 @@
               </div>
             </template>
             <div class="w-full flex flex-col text-white">
-              <div class="py-2 cursor-pointer px-3 navigation-btn">
-                <span @click="navigateTo('login')">Sign In</span>
+              <div v-if="getToken()">
+                <div class="py-2 cursor-pointer px-3 navigation-btn">
+                  <span @click="navigateTo('userHome')">User Home</span>
+                </div>
+                <div class="py-2 cursor-pointer px-3 navigation-btn">
+                  <span @click="userStore.logout()">Log Out</span>
+                </div>
               </div>
-              <div class="py-2 cursor-pointer px-3 navigation-btn">
-                <span @click="navigateTo('register')">Sign Up</span>
+              <div v-else>
+                <div class="py-2 cursor-pointer px-3 navigation-btn">
+                  <span @click="navigateTo('login')">Sign In</span>
+                </div>
+                <div class="py-2 cursor-pointer px-3 navigation-btn">
+                  <span @click="navigateTo('register')">Sign Up</span>
+                </div>
               </div>
             </div>
           </el-popover>
@@ -91,10 +101,13 @@ import { navigateTo } from '@/utils/common'
 import { PageParamsModel } from '@/api/tenor/model/tenorModel'
 import { autocomplete } from '@/api/tenor'
 import { Search, User } from '@element-plus/icons-vue'
+import { getToken } from '@/utils/auth'
+import { useUserStore } from '@/stores'
 
 const route = useRoute()
 const key = computed(() => `${String(route.name || route.path)}-${new Date()}`)
 const keywords = ref(route.query.q)
+const userStore = useUserStore()
 
 // eth变量
 const getAccountLoading = ref<boolean>(false)

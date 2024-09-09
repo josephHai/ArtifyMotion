@@ -104,9 +104,7 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { navigateTo } from '@/utils/common'
 import { IconLogo } from '@/assets/icon'
 import RightArea from './right-area.vue'
-import { login, fetchUserInfo } from '@/api/mgr/user'
-import { LoginResponse } from '@/api/mgr/model/result'
-import { useUserInfoStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -134,26 +132,18 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      await handleLogin()
+      const userStore = useUserStore()
+      await userStore.login(form.email, form.password)
       ElMessage({
         message: 'Login successful!',
         type: 'success',
       })
-      const redirect = route.query.redirect || '/'
+      const redirect = (route.query.redirect as string) || '/'
       router.push(redirect)
     } else {
       console.log('error submit', fields)
     }
   })
-}
-
-const handleLogin = async () => {
-  const loginData = (await login(form)) as unknown as LoginResponse
-  const { uid, token } = loginData.result
-  const userInfoStore = useUserInfoStore()
-  userInfoStore.login(uid, token)
-  const userInfo = await fetchUserInfo()
-  userInfoStore.setUserInfo(userInfo)
 }
 
 // 验证码

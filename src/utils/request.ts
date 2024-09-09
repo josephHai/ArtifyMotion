@@ -1,11 +1,9 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { useUserInfoStore } from '@/stores'
+import { getToken, removeToken } from './auth'
 import { navigateTo } from './common'
 
-const userInfoStore = useUserInfoStore()
-
-function createAxios(baseUrl?: string) {
+const createAxios = (baseUrl?: string) => {
   const service = axios.create({
     baseURL: baseUrl || import.meta.env.VITE_API_BASE_URL, // url = base url + request url
     timeout: 30000, // request timeout
@@ -14,7 +12,9 @@ function createAxios(baseUrl?: string) {
   // request interceptor
   service.interceptors.request.use(
     (config) => {
-      if (userInfoStore.token) config.headers['token'] = userInfoStore.token
+      const token = getToken()
+      if (token && !config.baseURL!.includes('tenor'))
+        config.headers['token'] = token
       return config
     },
     (error) => {
@@ -41,6 +41,7 @@ function createAxios(baseUrl?: string) {
 
       // if the custom code is not 200, it is judged as an error.
       if (res.code === 401) {
+        removeToken()
         navigateTo('/login')
         ElMessage({
           message: res['message'] || 'Error',

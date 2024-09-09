@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import piniaPersistedstate from 'pinia-plugin-persistedstate'
 import App from '@/App.vue'
 import router from '@/router'
 import './permission'
@@ -16,8 +17,12 @@ import i18n from '@/plugins/i18n'
 
 import { ObserveVisibility } from 'vue-observe-visibility'
 
+const pinia = createPinia()
+// 启用pinia持久化插件
+pinia.use(piniaPersistedstate)
+
 createApp(App)
-  .use(createPinia()) // 启用 Pinia
+  .use(pinia) // 启用 Pinia
   .use(router)
   .use(i18n)
   .directive('observe-visibility', {

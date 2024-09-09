@@ -1,36 +1,44 @@
 import { defineStore } from 'pinia'
 import { setToken, removeToken } from '@/utils/auth'
 import { UserInfoModel } from '@/api/mgr/model/userModel'
+import { login, fetchUserInfo } from '@/api/mgr/user'
+import { FetchUserInfoResponse, LoginResponse } from '@/api/mgr/model/result'
+import { navigateTo } from '@/utils/common'
 
-const useUserInfoStore = defineStore('userInfo', {
+const useUserStore = defineStore('userInfo', {
+  persist: true,
   state: () => ({
     uid: Number(null),
     token: '',
-    userInfo: {},
+    userInfo: {} as UserInfoModel,
   }),
   getters: {},
   actions: {
-    login(uid: number, token: string): Promise<string> {
-      return new Promise((resolve) => {
+    async login(email: string, password: string): Promise<void> {
+      try {
+        const loginRes = (await login({
+          email,
+          password,
+        })) as unknown as LoginResponse
+        const { token, uid } = loginRes.result
+        setToken(token)
         this.uid = uid
         this.token = token
-        setToken(token)
-        resolve('Login successful!')
-      })
+        const fetchUserInfoRes =
+          (await fetchUserInfo()) as unknown as FetchUserInfoResponse
+        this.userInfo = fetchUserInfoRes.result
+      } catch (error) {
+        console.error('Login failed:', error)
+      }
     },
-    logout(): Promise<string> {
-      return new Promise((resolve) => {
-        this.uid = Number(null)
-        this.token = ''
-        this.userInfo = {}
-        removeToken()
-        resolve('Logout successful!')
-      })
-    },
-    setUserInfo(userInfo: UserInfoModel): void {
-      this.userInfo = userInfo
+    logout(): void {
+      this.uid = Number(null)
+      this.token = ''
+      this.userInfo = {} as UserInfoModel
+      removeToken()
+      navigateTo('/')
     },
   },
 })
 
-export { useUserInfoStore }
+export { useUserStore }

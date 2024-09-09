@@ -10,7 +10,9 @@
       </div>
       <div class="ml-5">
         <div class="mb-4">
-          <span class="text-white font-bold text-xl">ct Hai</span>
+          <span class="text-white font-bold text-xl">{{
+            userStore.userInfo.username
+          }}</span>
         </div>
         <div
           v-if="route.name === 'userHome'"
@@ -32,6 +34,9 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { navigateTo } from '@/utils/common'
 import { IconEdit } from '@/assets/icon'
+import { useUserStore } from '@/stores'
+
+const userStore = useUserStore()
 
 const route = useRoute()
 const key = computed(() => `${String(route.name || route.path)}-${new Date()}`)

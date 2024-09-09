@@ -95,7 +95,6 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
 :deep(.el-input__wrapper) {
   box-shadow: none !important;
   border-radius: 36px;
-  background: white;
   outline: none;
   :deep(input) {
     outline: none !important;

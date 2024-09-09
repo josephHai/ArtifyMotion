@@ -133,13 +133,17 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       const userStore = useUserStore()
-      await userStore.login(form.email, form.password)
-      ElMessage({
-        message: 'Login successful!',
-        type: 'success',
-      })
-      const redirect = (route.query.redirect as string) || '/'
-      router.push(redirect)
+      try {
+        await userStore.login(form.email, form.password)
+        ElMessage({
+          message: 'Login successful!',
+          type: 'success',
+        })
+        const redirect = (route.query.redirect as string) || '/'
+        router.push(redirect)
+      } catch (error) {
+        return
+      }
     } else {
       console.log('error submit', fields)
     }

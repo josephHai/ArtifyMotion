@@ -21,8 +21,3 @@ export interface RegisterModel {
   address?: string
   emailCode: string
 }
-
-export interface UpdateInfoModel {
-  username: string
-  email: string
-}

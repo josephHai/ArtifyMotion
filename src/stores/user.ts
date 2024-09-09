@@ -27,8 +27,8 @@ const useUserStore = defineStore('userInfo', {
         const fetchUserInfoRes =
           (await fetchUserInfo()) as unknown as FetchUserInfoResponse
         this.info = fetchUserInfoRes.result
-      } catch (error) {
-        console.error('Login failed:', error)
+      } catch (error: any) {
+        throw new Error(error.message)
       }
     },
     logout(): void {

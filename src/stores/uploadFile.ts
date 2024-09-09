@@ -20,8 +20,9 @@ export const useUploadFileStore = defineStore('uploadFile', {
         resolve('Async Done')
       })
     },
-    updateUploadFileSync(newUrl: string, newFile: File) {
+    updateUploadFileSync(newUrl: string, newLocalUrl: string, newFile: File) {
       this.url = newUrl
+      this.localUrl = newLocalUrl
       this.file = newFile
     },
   },

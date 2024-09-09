@@ -130,7 +130,7 @@ let countTime = ref<number>(0)
 
 const acquire = () => {
   isCount.value = true
-  countTime.value = 5
+  countTime.value = 60
   const countInterval = setInterval(() => {
     countTime.value--
     if (countTime.value <= 0) {

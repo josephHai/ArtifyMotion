@@ -2,7 +2,7 @@
   <div id="login-form" class="w-full h-screen flex items-center">
     <div class="w-2/3">
       <div class="w-full flex flex-col items-center">
-        <div>
+        <div class="cursor-pointer" @click="router.push('/')">
           <icon-logo :width="300" />
         </div>
         <div class="w-1/3 mt-10">

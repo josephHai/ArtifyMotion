@@ -2,7 +2,7 @@
   <div id="register-form" class="w-full h-screen flex items-center">
     <div class="w-2/3">
       <div class="w-full flex flex-col items-center">
-        <div>
+        <div class="cursor-pointer" @click="router.push('/')">
           <icon-logo :width="300" />
         </div>
         <div class="w-1/3 mt-10">
@@ -45,13 +45,6 @@
                 v-model="form.email"
                 placeholder="Email"
                 clearable
-              />
-            </el-form-item>
-            <el-form-item prop="address">
-              <el-input
-                class="h-12"
-                v-model="form.address"
-                placeholder="Address"
               />
             </el-form-item>
             <el-form-item prop="emailCode">
@@ -104,13 +97,13 @@ import { navigateTo } from '@/utils/common'
 import { IconLogo } from '@/assets/icon'
 import rightArea from './right-area.vue'
 import { register, sendEmailCode } from '@/api/mgr/user'
+import router from '@/router'
 
 interface AccountForm {
   username: string
   password: string
   confirmPassword: string
   email: string
-  address: string
   emailCode: string
 }
 
@@ -120,7 +113,6 @@ const form = reactive<AccountForm>({
   password: '',
   confirmPassword: '',
   email: '',
-  address: '',
   emailCode: '',
 })
 

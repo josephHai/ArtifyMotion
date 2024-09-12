@@ -138,7 +138,7 @@
             <div class="text-white opacity-40 font-bold ml-2 text-sm">
               Style
             </div>
-            <el-row class="mt-2" :gutter="10">
+            <el-row class="mt-2 h-48 overflow-y-scroll" :gutter="10">
               <el-col
                 v-for="fontFamily in fontFamilies"
                 :key="fontFamily"
@@ -342,42 +342,42 @@ const colors = ref<string[]>([
   'khaki',
   'fuchsia',
   'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
-  'cyan',
+  'red',
+  'blue',
+  'green',
+  'yellow',
+  'gray',
+  'orange',
+  'purple',
+  'pink',
+  'brown',
+  'lime',
+  'teal',
+  'indigo',
+  'violet',
+  'beige',
+  'gold',
+  'silver',
 ])
 
 const fontFamilies = ref<object[]>([
-  {
-    label: 'Default',
-    name: 'Arial',
-  },
-  {
-    label: 'MEME',
-    name: 'Verdana',
-  },
-  {
-    label: 'PIXEL',
-    name: 'Times New Roman',
-  },
-  {
-    label: 'Fancy',
-    name: 'Georgia',
-  },
-  {
-    label: 'Subtitle',
-    name: 'Monaco',
-  },
-  {
-    label: 'Fusion',
-    name: 'Courier',
-  },
+  { label: 'Default', name: 'Arial' },
+  { label: 'MEME', name: 'Verdana' },
+  { label: 'PIXEL', name: 'Times New Roman' },
+  { label: 'Fancy', name: 'Georgia' },
+  { label: 'Subtitle', name: 'Monaco' },
+  { label: 'Fusion', name: 'Courier' },
+  { label: 'ELEGANT', name: 'Helvetica' },
+  { label: 'CLASSIC', name: 'Palatino' },
+  { label: 'MODERN', name: 'Trebuchet MS' },
+  { label: 'FUN', name: 'Comic Sans MS' },
+  { label: 'BOLD', name: 'Impact' },
+  { label: 'LUXURY', name: 'Lucida Sans Unicode' },
+  { label: 'SLEEK', name: 'Century Gothic' },
+  { label: 'CLEAN', name: 'Segoe UI' },
+  { label: 'FRESH', name: 'Calibri' },
+  { label: 'STYLISH', name: 'Candara' },
+  { label: 'STRONG', name: 'Franklin Gothic Medium' },
 ])
 
 const getFileInfo = () => {
@@ -587,6 +587,9 @@ onMounted(() => {
     font-size: 12px;
     color: #999999;
     line-height: 22px;
+  }
+  :deep(input) {
+    color: black;
   }
 }
 .secondary-box {

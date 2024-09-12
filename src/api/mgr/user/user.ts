@@ -24,3 +24,18 @@ export function changePassword(data: { emailCode: string; password: string }) {
     data,
   })
 }
+
+export function fetchUserFiles(params: {
+  page: number
+  limit: number
+  keywords: string
+  tags: string
+  group: string
+  orderBy: string
+}) {
+  return request({
+    url: 'fetchFiles',
+    method: 'get',
+    params,
+  })
+}

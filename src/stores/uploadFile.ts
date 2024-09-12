@@ -5,18 +5,21 @@ export const useUploadFileStore = defineStore('uploadFile', {
     url: '',
     localUrl: '',
     file: {} as File,
+    group: '',
   }),
   getters: {},
   actions: {
     updateUploadFile(
       newUrl: string,
       newLocalUrl: string,
-      newFile: File
+      newFile: File,
+      group?: string
     ): Promise<string> {
       return new Promise((resolve) => {
         this.url = newUrl
         this.localUrl = newLocalUrl
         this.file = newFile
+        this.group = group || 'gallery'
         resolve('Async Done')
       })
     },

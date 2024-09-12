@@ -246,11 +246,18 @@
               </el-popover>
             </div>
             <div class="w-1/4">
-              <div
-                class="w-full h-9 rounded-3xl flex justify-center items-center text-sm font-bold btn-bg"
+              <el-upload
+                class="uploader"
+                :auto-upload="false"
+                :show-file-list="false"
+                :on-change="handleStickerUpload"
               >
-                upload sticker
-              </div>
+                <div
+                  class="w-full h-9 rounded-3xl flex justify-center items-center text-sm font-bold btn-bg"
+                >
+                  upload sticker
+                </div>
+              </el-upload>
             </div>
           </div>
           <stickers-list
@@ -503,6 +510,24 @@ const handleUpload = () => {
 
   sourceImageInfo.value.url =
     baseUrl + '?op=upload' + '#' + generateRandomString(4)
+}
+
+const handleStickerUpload = (uploadFile) => {
+  const reader = new FileReader()
+
+  reader.readAsDataURL(uploadFile.raw)
+
+  reader.onload = (e) => {
+    uploadFileStore.updateUploadFile(
+      '',
+      e.target!.result.toString(),
+      uploadFile,
+      'sticker'
+    )
+    router.push({
+      name: 'finalize',
+    })
+  }
 }
 
 const handleFusion = (result) => {

@@ -1,11 +1,16 @@
 <template>
-  <div v-if="false">
+  <div v-if="userFiles.length > 0">
     <el-row justify="between" :gutter="8">
-      <el-col class="cursor-pointer" v-for="i in 8" :key="i" :span="6">
+      <el-col
+        class="cursor-pointer"
+        v-for="file in userFiles"
+        :key="file.fid"
+        :span="6"
+      >
         <el-image
-          :key="i"
+          :key="file.fid"
           class="absolute w-full rounded-xl"
-          src="https://media.tenor.com/kH2Q1iCaWVoAAAAM/burger-king-tiny-hands.gif"
+          :src="file.media.src.url"
         >
           <template #placeholder>
             <div class="w-full h-full image-loading-bg"></div>
@@ -18,6 +23,7 @@
     </el-row>
   </div>
   <div
+    v-else
     id="empty"
     class="w-full h-96 flex flex-col justify-center items-center empty-container"
   >
@@ -42,6 +48,28 @@
 
 <script setup lang="ts">
 import { navigateTo } from '@/utils/common'
+import { fetchUserFiles } from '@/api/mgr/user'
+import { UserFilesResponse } from '@/api/mgr/model/result'
+
+const userFiles = ref(<UserFilesResponse['result']>[])
+
+const params = {
+  page: 1,
+  limit: 10,
+  keywords: '',
+  tags: '',
+  group: 'creation',
+  orderBy: '',
+}
+
+const getUserWrok = async () => {
+  const res = (await fetchUserFiles(params)) as unknown as UserFilesResponse
+  userFiles.value = res.result
+}
+
+onMounted(() => {
+  getUserWrok()
+})
 </script>
 
 <style scoped lang="less">

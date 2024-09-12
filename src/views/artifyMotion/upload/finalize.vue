@@ -232,6 +232,7 @@ const upload = async () => {
   )
   formData.append('accessPermission', visibility ? 'public' : 'private')
   formData.append('tags', tags.value.join(''))
+  formData.append('group', uploadFileStore.group)
 
   return await uploadFile(formData)
 }

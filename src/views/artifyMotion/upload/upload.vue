@@ -131,7 +131,8 @@ const handleUpload = (uploadFile) => {
     uploadFileStore.updateUploadFile(
       '',
       e.target!.result.toString(),
-      uploadFile
+      uploadFile,
+      'gallery'
     )
     router.push({
       name: targetRoute.value,

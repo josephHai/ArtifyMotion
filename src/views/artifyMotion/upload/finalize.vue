@@ -112,7 +112,12 @@
               </div>
             </el-col>
           </el-row>
-          <el-input v-model="imageName" class="mt-3 tags-box" maxlength="30">
+          <el-input
+            v-model="imageName"
+            class="mt-3 tags-box"
+            maxlength="30"
+            disabled
+          >
             <template #prefix>
               <el-icon>
                 <i-ep-picture-filled />
@@ -264,6 +269,9 @@ onMounted(() => {
   height: 38px;
   :deep(.el-input__wrapper) {
     background-color: white;
+  }
+  :deep(input) {
+    color: black;
   }
 }
 

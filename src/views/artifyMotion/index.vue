@@ -61,11 +61,17 @@
                 </div>
               </div>
               <div v-else>
-                <div class="py-2 cursor-pointer px-3 navigation-btn">
-                  <span @click="navigateTo('login')">Sign In</span>
+                <div
+                  class="py-2 cursor-pointer px-3 navigation-btn"
+                  @click="navigateTo('login')"
+                >
+                  <span>Sign In</span>
                 </div>
-                <div class="py-2 cursor-pointer px-3 navigation-btn">
-                  <span @click="navigateTo('register')">Sign Up</span>
+                <div
+                  class="py-2 cursor-pointer px-3 navigation-btn"
+                  @click="navigateTo('register')"
+                >
+                  <span>Sign Up</span>
                 </div>
               </div>
             </div>

@@ -39,3 +39,18 @@ export function fetchUserFiles(params: {
     params,
   })
 }
+
+export function fetchLikeFiles(params: {
+  page: number
+  limit: number
+  keywords: string
+  tags: string
+  group: string
+  orderBy: string
+}) {
+  return request({
+    url: 'fetchLikeFiles',
+    method: 'get',
+    params,
+  })
+}

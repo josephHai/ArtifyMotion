@@ -5,7 +5,7 @@
         <el-avatar
           class="user-avatar"
           :size="80"
-          src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+          :src="userStore.info.avatar"
         />
       </div>
       <div class="ml-5">
@@ -18,7 +18,7 @@
           v-if="route.name === 'userHome'"
           class="flex items-center text-white cursor-pointer"
         >
-          <icon-edit class="w-4 h-4 mr-2" />
+          <icon-edit class="w-4 h-4 mr-2" fill="white" />
           <span @click="navigateTo('profile')">Edit Profile</span>
         </div>
       </div>

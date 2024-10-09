@@ -1,6 +1,6 @@
 export interface UserInfoModel {
   username: string
-  profile: string
+  avatar?: string
   phoneNumber?: string
   email: string
   address?: string

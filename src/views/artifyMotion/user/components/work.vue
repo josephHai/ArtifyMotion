@@ -1,48 +1,53 @@
 <template>
-  <div v-if="userFiles.length > 0">
-    <el-row justify="between" :gutter="8">
-      <el-col
-        class="cursor-pointer"
-        v-for="file in userFiles"
-        :key="file.fid"
-        :span="6"
-      >
-        <el-image
+  <div v-if="!loadLoading">
+    <div v-if="userFiles.length > 0">
+      <el-row justify="between" :gutter="8">
+        <el-col
+          class="cursor-pointer"
+          v-for="file in userFiles"
           :key="file.fid"
-          class="absolute w-full rounded-xl"
-          :src="file.media.src.url"
+          :span="6"
         >
-          <template #placeholder>
-            <div class="w-full h-full image-loading-bg"></div>
-          </template>
-          <template #error>
-            <div class="w-full h-full image-loading-bg"></div>
-          </template>
-        </el-image>
-      </el-col>
-    </el-row>
-  </div>
-  <div
-    v-else
-    id="empty"
-    class="w-full h-96 flex flex-col justify-center items-center empty-container"
-  >
-    <div class="text-6xl font-bold text-[#E6FF21]">+</div>
-    <div class="text-white text-sm">You haven't uploaded anything!</div>
-    <div class="flex mt-5">
-      <div
-        class="w-36 h-9 mx-3 flex justify-center items-center rounded-3xl text-black font-bold text-sm cursor-pointer op-btn"
-        @click="navigateTo('upload')"
-      >
-        Upload
-      </div>
-      <div
-        class="w-36 h-9 mx-3 flex justify-center items-center rounded-3xl text-black font-bold text-sm cursor-pointer op-btn"
-        @click="navigateTo('upload', { behavior: 'creation' })"
-      >
-        Creation
+          <el-image
+            :key="file.fid"
+            class="absolute w-full rounded-xl"
+            :src="file.media.src.url"
+          >
+            <template #placeholder>
+              <div class="w-full h-full image-loading-bg"></div>
+            </template>
+            <template #error>
+              <div class="w-full h-full image-loading-bg"></div>
+            </template>
+          </el-image>
+        </el-col>
+      </el-row>
+    </div>
+    <div
+      v-else
+      id="empty"
+      class="w-full h-96 flex flex-col justify-center items-center empty-container"
+    >
+      <div class="text-6xl font-bold text-[#E6FF21]">+</div>
+      <div class="text-white text-sm">You haven't uploaded anything!</div>
+      <div class="flex mt-5">
+        <div
+          class="w-36 h-9 mx-3 flex justify-center items-center rounded-3xl text-black font-bold text-sm cursor-pointer op-btn"
+          @click="navigateTo('upload')"
+        >
+          Upload
+        </div>
+        <div
+          class="w-36 h-9 mx-3 flex justify-center items-center rounded-3xl text-black font-bold text-sm cursor-pointer op-btn"
+          @click="navigateTo('upload', { behavior: 'creation' })"
+        >
+          Creation
+        </div>
       </div>
     </div>
+  </div>
+  <div v-else class="flex justify-center mt-32">
+    <icon-loading />
   </div>
 </template>
 
@@ -50,7 +55,9 @@
 import { navigateTo } from '@/utils/common'
 import { fetchUserFiles } from '@/api/mgr/user'
 import { UserFilesResponse } from '@/api/mgr/model/result'
+import { IconLoading } from '@/assets/icon'
 
+const loadLoading = ref<boolean>(false)
 const userFiles = ref(<UserFilesResponse['result']>[])
 
 const params = {
@@ -63,8 +70,10 @@ const params = {
 }
 
 const getUserWrok = async () => {
+  loadLoading.value = true
   const res = (await fetchUserFiles(params)) as unknown as UserFilesResponse
   userFiles.value = res.result
+  loadLoading.value = false
 }
 
 onMounted(() => {

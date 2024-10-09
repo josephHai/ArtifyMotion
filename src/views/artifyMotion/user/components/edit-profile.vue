@@ -9,18 +9,12 @@
         />
       </div>
       <div>
-        <el-upload
-          ref="upload"
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-          :auto-upload="false"
-          :limit="1"
-          :on-exceed="handleExceed"
-        >
+        <el-upload :auto-upload="false" :limit="1" :on-change="handleUpload">
           <template #trigger>
             <div
               class="w-36 h-9 flex justify-center items-center font-bold rounded-3xl file-btn"
             >
-              <icon-edit class="w-4 h-4 bg-black mr-1" />
+              <icon-edit class="w-4 h-4 mr-1" />
               <span>select file</span>
             </div>
           </template>
@@ -35,6 +29,7 @@
     </div>
     <div
       class="w-full h-10 mt-10 flex justify-center items-center rounded-3xl opacity-60 cursor-pointer font-bold upload-btn"
+      @click="upload"
     >
       Upload now
     </div>
@@ -43,17 +38,31 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { genFileId } from 'element-plus'
-import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus'
+import { UploadFile } from 'element-plus'
+import { uploadFile } from '@/api/file'
 import { IconEdit } from '@/assets/icon'
 
-const upload = ref<UploadInstance>()
+const fileInstnce = ref<Blob>()
 
-const handleExceed: UploadProps['onExceed'] = (files) => {
-  upload.value!.clearFiles()
-  const file = files[0] as UploadRawFile
-  file.uid = genFileId()
-  upload.value!.handleStart(file)
+const handleUpload = (uploadFile: UploadFile) => {
+  const reader = new FileReader()
+
+  reader.readAsDataURL(uploadFile.raw as Blob)
+
+  reader.onload = () => {
+    fileInstnce.value = uploadFile.raw as Blob
+  }
+}
+
+const upload = async () => {
+  const formData = new FormData()
+
+  formData.append('file', fileInstnce.value!)
+  formData.append('accessPermission', 'private')
+  formData.append('tags', '')
+  formData.append('group', 'avatar')
+
+  return await uploadFile(formData)
 }
 </script>
 

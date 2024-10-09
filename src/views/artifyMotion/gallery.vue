@@ -56,18 +56,27 @@
     </div>
     <!-- 文件列表结束 -->
     <!-- 素材列表 -->
-    <div ref="materialList" class="mt-5 overflow-hidden">
+    <div ref="materialList" class="w-full mt-5 overflow-hidden m-auto">
       <div
         class="material-item"
         v-for="file in fileList.slice(5)"
+        :style="{ width: `${materialItemWidth}px` }"
         :key="file.id"
         @click="navigateTo('creation', { id: file.id })"
       >
         <el-image
           :key="file.id"
+          fit="cover"
           class="absolute w-full rounded-xl"
           :src="file.media_formats.gif.url"
-          :style="{ height: file.media_formats.tinygif.dims[1] + 'px' }"
+          :style="{
+            height: materialItemWidth
+              ? (file.media_formats.gif.dims[1] /
+                  file.media_formats.gif.dims[0]) *
+                  materialItemWidth +
+                'px'
+              : '200px',
+          }"
         >
           <template #placeholder>
             <div class="w-full h-full image-loading-bg"></div>
@@ -138,10 +147,12 @@ import { Curve } from '@/assets/icon'
 import Masonry from 'masonry-layout'
 import { nextTick } from 'vue'
 import { getFeatured, search } from '@/api/tenor'
+import { throttle } from '@/utils/common'
 
 const materialList = ref()
 const _masonry = ref<Masonry>()
 const route = useRoute()
+const numItemsPerRow = ref(4)
 
 // 图片文件获取及渲染
 const carouselActiveIndex = ref<Number>(0)
@@ -150,6 +161,7 @@ const curPos = ref<string | number>('')
 const busy = ref<boolean>(false)
 const hasData = ref<boolean>(true)
 const keywords = ref(route.query.q)
+const materialItemWidth = ref<number>(200)
 
 /**
  * 获取素材列表
@@ -193,6 +205,7 @@ const layout = () => {
   _masonry.value = new Masonry(materialList.value, {
     itemSelector: '.material-item',
     percentPosition: true,
+    fitWidth: true,
     gutter: 10,
   })
 }
@@ -201,7 +214,29 @@ const loadingData = (visible: boolean) => {
   if (visible && hasData.value && !busy.value) getList()
 }
 
+const updateMaterialItemWidth = () => {
+  console.log('updateMaterialItemWidth')
+  const width = window.innerWidth
+
+  if (width < 576) {
+    // 超小屏幕（Extra small devices）< 576px
+    numItemsPerRow.value = 2
+  } else if (width >= 576 && width < 992) {
+    // 小屏幕（Small devices）和中等屏幕（Medium devices）
+    numItemsPerRow.value = 3
+  } else {
+    // 大屏幕（Large devices）及以上
+    numItemsPerRow.value = 4
+  }
+
+  materialItemWidth.value =
+    materialList.value.clientWidth / numItemsPerRow.value - 10
+}
+
 onMounted(() => {
+  updateMaterialItemWidth()
+  const throttleUpdate = throttle(updateMaterialItemWidth, 200)
+  window.addEventListener('resize', throttleUpdate)
   nextTick(() => {
     layout()
   })
@@ -209,6 +244,10 @@ onMounted(() => {
 
 onUpdated(() => {
   layout()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateMaterialItemWidth)
 })
 </script>
 
@@ -223,10 +262,6 @@ onUpdated(() => {
     rgba(0, 0, 0, 0) 0%,
     rgba(0, 0, 0, 0.9) 100%
   );
-}
-
-.material-item {
-  width: calc(100% / 4 - 10px);
 }
 
 :deep(.el-carousel__arrow) {

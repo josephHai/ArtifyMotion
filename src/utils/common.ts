@@ -40,3 +40,23 @@ export const navigateTo = (name: string, params?: RouteParamsRaw) => {
     params,
   })
 }
+
+// eslint-disable-next-line no-unused-vars
+export function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  limit: number
+  // eslint-disable-next-line no-unused-vars
+): (...args: Parameters<T>) => void {
+  let inThrottle = false
+
+  return function (this: any, ...args: Parameters<T>) {
+    // 明确 this 的类型
+    if (!inThrottle) {
+      func.apply(this, args) // 使用 apply 函数来传递 args
+      inThrottle = true // 将 inThrottle 设为 true
+      setTimeout(() => {
+        inThrottle = false // 在定时器结束后重置 inThrottle
+      }, limit)
+    }
+  }
+}

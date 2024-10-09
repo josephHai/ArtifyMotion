@@ -6,7 +6,12 @@ import IconSwitch from './switches-2.svg'
 import IconBinding from './icon-binding.svg'
 import Curve from './curve.vue'
 import IconLogo from './logo/logo.vue'
-import { IconLoading, LocalLoadingSvg, LocalLoading } from './loaders'
+import {
+  IconLoading,
+  LocalLoadingSvg,
+  LocalLoading,
+  TinyLoading,
+} from './loaders'
 
 export {
   IconSearchPlus,
@@ -20,4 +25,5 @@ export {
   IconLoading,
   LocalLoadingSvg,
   LocalLoading,
+  TinyLoading,
 }

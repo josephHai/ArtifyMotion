@@ -1,5 +1,11 @@
 <template>
-  <div class="mt-5">
+  <div
+    class="mt-5"
+    v-loading="stickerUploadLoading"
+    element-loading-background="rgba(36, 36, 36, 0.8)"
+    element-loading-spinner="el-icon-loading"
+    element-loading-custom-class="c-fs-loading"
+  >
     <el-row justify="space-between" style="min-height: 600px">
       <!-- 图片预览 -->
       <el-col
@@ -298,7 +304,7 @@
 <script setup lang="ts">
 import GifRender from '@/components/gif-render.vue'
 import FrameRender from '@/components/frame-render.vue'
-import { getFilesList, getStickerTags } from '@/api/file'
+import { getFilesList, getStickerTags, uploadFile } from '@/api/file'
 import { getPosts } from '@/api/tenor'
 import { headTrack } from '@/api/creation'
 import { useRoute } from 'vue-router'
@@ -483,7 +489,7 @@ const getStickers = () => {
   const params = {
     page: 1,
     limit: 50,
-    searchFilter: 'sticker',
+    group: 'sticker',
     keywords: selectedTag.value == 'all' ? '' : selectedTag.value,
   }
   getFilesList(params).then((res) => {
@@ -512,21 +518,27 @@ const handleUpload = () => {
     baseUrl + '?op=upload' + '#' + generateRandomString(4)
 }
 
-const handleStickerUpload = (uploadFile) => {
+// 处理sticker上传
+const stickerUploadLoading = ref<boolean>(false)
+
+const handleStickerUpload = async (fileInstnce: UploadFile) => {
   const reader = new FileReader()
 
-  reader.readAsDataURL(uploadFile.raw)
+  reader.readAsDataURL(fileInstnce.raw as Blob)
 
-  reader.onload = (e) => {
-    uploadFileStore.updateUploadFile(
-      '',
-      e.target!.result.toString(),
-      uploadFile,
-      'sticker'
-    )
-    router.push({
-      name: 'finalize',
-    })
+  reader.onload = async () => {
+    const formData = new FormData()
+
+    formData.append('file', fileInstnce.raw as Blob)
+    formData.append('accessPermission', 'public')
+    formData.append('tags', '')
+    formData.append('group', 'sticker')
+
+    stickerUploadLoading.value = true
+    await uploadFile(formData)
+    getStickers()
+    stickerUploadLoading.value = false
+    ElMessage.success('Upload success')
   }
 }
 

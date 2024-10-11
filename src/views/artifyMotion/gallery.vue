@@ -215,7 +215,6 @@ const loadingData = (visible: boolean) => {
 }
 
 const updateMaterialItemWidth = () => {
-  console.log('updateMaterialItemWidth')
   const width = window.innerWidth
 
   if (width < 576) {

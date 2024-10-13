@@ -4,7 +4,7 @@ import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
-const whiteList = ['/', '/login', '/register', '/upload/creation', '/creation'] // no redirect whitelist
+const whiteList = ['/', '/login', '/register', '/upload/creation', 'creation'] // no redirect whitelist
 
 router.beforeEach(async (to, from, next) => {
   // start progress bar
@@ -27,7 +27,10 @@ router.beforeEach(async (to, from, next) => {
   } else {
     /* has no token*/
 
-    if (whiteList.indexOf(to.path) !== -1) {
+    if (
+      whiteList.indexOf(to.name as string) !== -1 ||
+      whiteList.indexOf(to.path) !== -1
+    ) {
       // in the free login whitelist, go directly
       next()
     } else {

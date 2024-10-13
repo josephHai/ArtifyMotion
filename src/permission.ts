@@ -4,7 +4,7 @@ import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
 
-const whiteList = ['/', '/login', '/register', '/upload'] // no redirect whitelist
+const whiteList = ['/', '/login', '/register', '/upload/creation', '/creation'] // no redirect whitelist
 
 router.beforeEach(async (to, from, next) => {
   // start progress bar

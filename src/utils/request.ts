@@ -42,7 +42,7 @@ const createAxios = (baseUrl?: string) => {
       // if the custom code is not 200, it is judged as an error.
       if (res.code === 401) {
         removeToken()
-        navigateTo('/login')
+        navigateTo('login')
         ElMessage({
           message: res['message'] || 'Error',
           type: 'error',

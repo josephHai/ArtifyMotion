@@ -213,6 +213,9 @@ onMounted(() => {
   :deep(.el-input__wrapper) {
     background-color: white;
   }
+  :deep(.el-input__inner) {
+    color: #000000;
+  }
   :deep(.el-input__wrapper input::placeholder) {
     text-align: center;
     font-size: 16px;

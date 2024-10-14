@@ -12,6 +12,7 @@ import {
   LocalLoading,
   TinyLoading,
 } from './loaders'
+import IconTrash from './trash.svg'
 
 export {
   IconSearchPlus,
@@ -26,4 +27,5 @@ export {
   LocalLoadingSvg,
   LocalLoading,
   TinyLoading,
+  IconTrash,
 }

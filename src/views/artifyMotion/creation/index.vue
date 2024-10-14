@@ -270,6 +270,7 @@
             class="mt-1 py-2"
             :stickers="stickers"
             @select="handleStickerSelect"
+            @delete="handleStickerDelete"
           ></stickers-list>
         </div>
         <!-- Stickers End -->
@@ -499,6 +500,13 @@ const getStickers = () => {
 
 const handleStickerSelect = (event) => {
   selectedStickerUrl.value = event.target.src + '#' + generateRandomString(4)
+}
+
+const handleStickerDelete = (fid) => {
+  stickers.value.splice(
+    stickers.value.findIndex((item) => item.fid === fid),
+    1
+  )
 }
 
 // 3. 操作按钮点击事件

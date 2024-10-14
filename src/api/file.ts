@@ -32,3 +32,11 @@ export function getStickerTags() {
     method: 'get',
   })
 }
+
+export function deleteFiles(data: object) {
+  return request({
+    url: '/deleteFiles',
+    method: 'post',
+    data,
+  })
+}

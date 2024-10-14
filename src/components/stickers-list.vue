@@ -15,11 +15,9 @@
             :key="sticker.fid"
             class="relative group inline-block mt-3"
           >
-            <div>
+            <div class="flex items-center">
               <el-image
-                fit="contain"
-                style="width: 100px; height: 100px"
-                class="pointer"
+                class="pointer w-3/4"
                 :src="sticker.media.src.url"
                 @click="handleStickerSelect"
               >
@@ -34,22 +32,22 @@
                   </div>
                 </template>
               </el-image>
+              <el-popconfirm
+                title="Are you sure to delete this?"
+                effect="dark"
+                @confirm="handleStickerDelete(sticker.fid)"
+              >
+                <template #reference>
+                  <div
+                    v-if="userStore.uid === sticker.uploadUserId"
+                    class="absolute top-[-10%] right-[10%] hidden group-hover:flex text-white p-2 rounded-full cursor-pointer hover:text-gray-200"
+                    style="pointer-events: auto"
+                  >
+                    <icon-trash class="h-5 w-5" />
+                  </div>
+                </template>
+              </el-popconfirm>
             </div>
-            <el-popconfirm
-              title="Are you sure to delete this?"
-              effect="dark"
-              @confirm="handleStickerDelete(sticker.fid)"
-            >
-              <template #reference>
-                <div
-                  v-if="userStore.uid === sticker.uploadUserId"
-                  class="absolute top-0 right-0 hidden group-hover:flex text-white p-2 rounded-full cursor-pointer hover:text-gray-200"
-                  style="pointer-events: auto"
-                >
-                  <icon-trash class="h-5 w-5" />
-                </div>
-              </template>
-            </el-popconfirm>
           </el-col>
         </el-row>
       </el-scrollbar>

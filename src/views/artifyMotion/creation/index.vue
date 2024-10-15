@@ -538,7 +538,7 @@ const handleStickerUpload = async (fileInstnce: UploadFile) => {
     const formData = new FormData()
 
     formData.append('file', fileInstnce.raw as Blob)
-    formData.append('accessPermission', 'public')
+    formData.append('accessPermission', 'private')
     formData.append('tags', '')
     formData.append('group', 'sticker')
 

@@ -126,10 +126,19 @@
           </el-input>
           <el-row class="mt-8">
             <div
-              class="w-full rounded-3xl py-2 text-center cursor-pointer btn-bg"
+              class="w-full h-12 flex justify-center items-center rounded-3xl cursor-pointer font-bold btn-bg"
               @click="handleUpload"
             >
-              <div class="text-black font-bold">Upload</div>
+              <span v-show="!uploadLoading" class="text-black font-bold"
+                >Upload</span
+              >
+              <div
+                v-show="uploadLoading"
+                class="flex justify-center items-center"
+              >
+                <tiny-loading />
+                Uploading...
+              </div>
             </div>
           </el-row>
           <!-- <el-row class="mt-1">
@@ -189,7 +198,7 @@ import { useUploadFileStore } from '@/stores'
 import { uploadFile } from '@/api/file'
 import { ElMessage } from 'element-plus'
 import CModal from '@/components/c-modal.vue'
-import { IconLoading } from '@/assets/icon'
+import { IconLoading, TinyLoading } from '@/assets/icon'
 
 // 文件上传
 const tag = ref<string>('')
@@ -198,6 +207,7 @@ const sourceUrl = ref()
 const imageName = ref()
 const visibility = ref(true)
 const uploadFileStore = useUploadFileStore()
+const uploadLoading = ref(false)
 
 const addTag = () => {
   if (tag.value !== '') {
@@ -213,12 +223,14 @@ const handleClose = (tag: string) => {
 }
 
 const handleUpload = () => {
+  uploadLoading.value = true
   upload().then(() => {
     ElMessage({
       type: 'success',
       message: 'success',
       duration: 3 * 1000,
     })
+    uploadLoading.value = false
     router.back()
   })
 }

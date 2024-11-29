@@ -27,7 +27,9 @@
           <div class="header-right w-full flex items-center">
             <div
               class="w-full h-10 flex justify-center items-center rounded-3xl bg-transparent text-white mx-1 cursor-pointer c-btn-light"
-              @click="router.push({ name: 'upload' })"
+              @click="
+                router.push({ name: 'upload', params: { behavior: 'upload' } })
+              "
             >
               {{ $t('message.upload') }}
             </div>

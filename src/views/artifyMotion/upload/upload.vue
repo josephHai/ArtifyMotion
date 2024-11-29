@@ -10,7 +10,11 @@
       <div class="mt-5">
         <el-row>
           <div class="m-auto">
-            <curve :width="360" text="Upload" custom-style="color: #E7FF25;" />
+            <curve
+              :width="360"
+              :text="targetRoute === 'creation' ? 'Creation' : 'Upload'"
+              custom-style="color: #E7FF25;"
+            />
           </div>
         </el-row>
         <el-row class="mt-1">
@@ -84,10 +88,13 @@ import { useUploadFileStore } from '@/stores'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Curve } from '@/assets/icon'
+import { computed } from 'vue'
 
 const parseUrl = ref<string>('')
 const uploadFileStore = useUploadFileStore()
-const targetRoute = ref<string>('finalize')
+const targetRoute = computed(() => {
+  return useRoute().params.behavior == 'creation' ? 'creation' : 'finalize'
+})
 const parseUrlLoading = ref<boolean>(false)
 
 const parseUrlChange = () => {
@@ -158,10 +165,6 @@ const isImageUrl = async (url: string): Promise<boolean> => {
     return false
   }
 }
-
-onMounted(() => {
-  if (useRoute().params.behavior) targetRoute.value = 'creation'
-})
 </script>
 
 <style scoped lang="less">

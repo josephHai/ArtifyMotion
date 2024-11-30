@@ -1,27 +1,37 @@
 import { fabric } from 'fabric'
 import trash from '@/assets/icon/trash.svg?url'
+import flipX from '@/assets/icon/flipX.svg?url'
 
-export class memeFabric {
-  trashImg: HTMLImageElement
-  constructor() {
-    this.trashImg = document.createElement('img')
-    this.trashImg.src = trash
+export class MemeFabric {
+  name2ImgMap: Map<string, HTMLImageElement>
+  instance: fabric.Object
+  canvas: fabric.Canvas
+  constructor(instance: fabric.Object, canvas: fabric.Canvas) {
+    const trashImg = document.createElement('img')
+    trashImg.src = trash
+    const flipXImg = document.createElement('img')
+    flipXImg.src = flipX
+    this.name2ImgMap = new Map()
+    this.name2ImgMap.set('trash', trashImg)
+    this.name2ImgMap.set('flipX', flipXImg)
+
+    this.instance = instance
+    this.canvas = canvas
+
+    this.init()
   }
 
-  addDeleteControl = (
-    instance: fabric.Object,
-    canvas: fabric.Canvas,
-    callback: Function
-  ) => {
-    instance.set({
+  init = () => {
+    this.instance.set({
       cornerSize: 24,
       borderColor: 'rgba(230, 255, 33, 0.4)',
       borderScaleFactor: 5,
       borderDashArray: [5, 5],
       cornerStyle: 'circle',
+      cornerDashArray: [2, 2],
       cornerColor: '#E6FF21',
     })
-    instance.setControlsVisibility({
+    this.instance.setControlsVisibility({
       tl: false, //top-left
       mt: false, // middle-top
       tr: false, //top-right
@@ -29,32 +39,13 @@ export class memeFabric {
       mr: false, //middle-right
       bl: false, // bottom-left
       mb: false, //middle-bottom
-      br: false, //bottom-right,
-      mtr: false, // rotate
-    })
-    let instanceToCanvasRight =
-      canvas.width! - instance.left! - instance.getBoundingRect().width
-    instance.controls.deleteControl = new fabric.Control({
-      x: instanceToCanvasRight > 30 ? 0.5 : -0.5,
-      y: -0.5,
-      offsetX: instance.cornerSize! / 2,
-      offsetY: instance.cornerSize! / 2,
-      cursorStyle: 'pointer',
-      //@ts-ignore
-      mouseUpHandler: callback,
-      render: (ctx, left, top) => {
-        const size = instance.cornerSize!
-        ctx.save()
-        ctx.translate(left, top)
-        ctx.drawImage(this.trashImg, -size / 2, -size / 2, size, size)
-        ctx.fillStyle = 'pink'
-        ctx.restore()
-      },
+      br: true, //bottom-right,
+      mtr: true, // rotate
     })
 
-    canvas.on('mouse:move', (event) => {
-      const pointer = canvas.getPointer(event.e)
-      const rect = instance.getBoundingRect()
+    this.canvas.on('mouse:move', (event) => {
+      const pointer = this.canvas.getPointer(event.e)
+      const rect = this.instance.getBoundingRect()
       // 计算鼠标位置与矩形边界的距离
       const isLeftIn =
         pointer.x >= rect.left - 32 && pointer.x <= rect.left + rect.width + 32
@@ -64,8 +55,54 @@ export class memeFabric {
       // 判断是否超出了阈值
       if (!isLeftIn || !isTopIn) {
         // 触发自定义的 mouseout 事件
-        instance.fire('custom:mouseout')
+        this.instance.fire('custom:mouseout')
       }
+    })
+  }
+
+  addCustomControl = (controlName: string, callback: Function) => {
+    if (controlName === 'trash') {
+      this.instance.controls.deleteControl = this.generateControl(
+        controlName,
+        callback
+      )
+    } else if (controlName === 'flipX') {
+      this.instance.controls.flipXControl = this.generateControl(
+        controlName,
+        callback
+      )
+    }
+  }
+
+  generateControl = (controlName: string, callback: Function) => {
+    let instanceToCanvasRight =
+      this.canvas.width! -
+      this.instance.left! -
+      this.instance.getBoundingRect().width
+    const top = controlName === 'trash' ? -0.5 : -0.3
+
+    return new fabric.Control({
+      x: instanceToCanvasRight > 30 ? 0.5 : -0.5,
+      y: top,
+      offsetX: this.instance.cornerSize! / 2,
+      offsetY: this.instance.cornerSize! / 2,
+      cursorStyle: 'pointer',
+      //@ts-ignore
+      mouseUpHandler: callback,
+      render: (ctx, left, top) => {
+        const size = this.instance.cornerSize!
+        ctx.save()
+        ctx.translate(left, top)
+        ctx.drawImage(
+          this.name2ImgMap.get(controlName)!,
+          -size / 2,
+          -size / 2,
+          size,
+          size
+        )
+        ctx.fillStyle = 'pink'
+        ctx.restore()
+      },
     })
   }
 }

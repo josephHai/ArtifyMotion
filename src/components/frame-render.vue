@@ -146,7 +146,7 @@ import {
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
 import { sleep } from '@bassist/utils'
-import { memeFabric } from '@/utils/style.fabric'
+import { MemeFabric } from '@/utils/style.fabric'
 
 const props = defineProps({
   boxWidth: {
@@ -346,9 +346,12 @@ const addSticker = (
 ) => {
   const newSticker = stickerModify(item, sticker, stickerStyle, true)
   if (newSticker) {
-    new memeFabric().addDeleteControl(newSticker, sourceImageCanvas, () => {
-      props.trackResults![selectedFaceId].stickerId = ''
-    })
+    new MemeFabric(newSticker, sourceImageCanvas).addCustomControl(
+      'trash',
+      () => {
+        props.trackResults![selectedFaceId].stickerId = ''
+      }
+    )
     if (item.id == selectedFaceId) sourceImageCanvas.setActiveObject(newSticker)
     sourceImageCanvas.add(newSticker)
   }

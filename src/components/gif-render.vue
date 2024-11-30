@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { fabric } from 'fabric'
 import { fabricGif } from '@/utils/gif.fabric'
-import { memeFabric } from '@/utils/style.fabric'
+import { MemeFabric } from '@/utils/style.fabric'
 import router from '@/router'
 import { useUploadFileStore } from '@/stores'
 import { ElMessage } from 'element-plus'
@@ -148,9 +148,12 @@ const addText = () => {
   const scale = props.boxWidth / props.sourceImageInfo.width
 
   fabricText.fontSize = fabricText.fontSize * scale
-  new memeFabric().addDeleteControl(fabricText, sourceImageCanvas, () => {
-    sourceImageCanvas.remove(fabricText)
-  })
+  new MemeFabric(fabricText, sourceImageCanvas).addCustomControl(
+    'trash',
+    () => {
+      sourceImageCanvas.remove(fabricText)
+    }
+  )
 
   fabricText.on('mouseover', () => {
     sourceImageCanvas.setActiveObject(fabricText)
@@ -187,25 +190,27 @@ const addSticker = () => {
       })
       img.scaleToWidth(120)
 
-      new memeFabric().addDeleteControl(
-        img,
-        sourceImageCanvas,
-        (eventData, transform) => {
-          let target = transform.target
-          stickersOnCanvas.value.splice(stickersOnCanvas.value.indexOf(target))
-          sourceImageCanvas.remove(target)
-        }
-      )
+      const customSticker = new MemeFabric(img, sourceImageCanvas)
+
+      customSticker.addCustomControl('trash', (eventData, transform) => {
+        let target = transform.target
+        stickersOnCanvas.value.splice(stickersOnCanvas.value.indexOf(target))
+        sourceImageCanvas.remove(target)
+      })
+
+      customSticker.addCustomControl('flipX', (eventData, transform) => {
+        transform.target.flipX = !transform.target.flipX
+      })
 
       img.on('mouseover', () => {
         sourceImageCanvas.setActiveObject(img)
         sourceImageCanvas.renderAll()
       })
 
-      img.on('mouseout', () => {
-        sourceImageCanvas.discardActiveObject()
-        sourceImageCanvas.renderAll()
-      })
+      // img.on('mouseout', () => {
+      //   sourceImageCanvas.discardActiveObject()
+      //   sourceImageCanvas.renderAll()
+      // })
 
       sourceImageCanvas.add(img)
       stickersOnCanvas.value.push(img)

@@ -1,6 +1,6 @@
 import { fabric } from 'fabric'
 import trash from '@/assets/icon/trash.svg?url'
-import flipX from '@/assets/icon/flipX.svg?url'
+import flipX from '@/assets/icon/tool_hFlip.svg?url'
 
 export class MemeFabric {
   name2ImgMap: Map<string, HTMLImageElement>
@@ -82,7 +82,7 @@ export class MemeFabric {
     const top = controlName === 'trash' ? -0.5 : -0.3
 
     return new fabric.Control({
-      x: instanceToCanvasRight > 30 ? 0.5 : -0.5,
+      x: instanceToCanvasRight > 30 ? 0.6 : -0.6,
       y: top,
       offsetX: this.instance.cornerSize! / 2,
       offsetY: this.instance.cornerSize! / 2,
@@ -92,7 +92,14 @@ export class MemeFabric {
       render: (ctx, left, top) => {
         const size = this.instance.cornerSize!
         ctx.save()
+
         ctx.translate(left, top)
+
+        ctx.beginPath() // 开始绘制路径
+        ctx.arc(0, 0, size / 1.5, 0, Math.PI * 2) // 绘制圆形背景
+        ctx.fillStyle = 'rgba(0, 0, 0)'
+        ctx.fill()
+
         ctx.drawImage(
           this.name2ImgMap.get(controlName)!,
           -size / 2,
@@ -100,7 +107,7 @@ export class MemeFabric {
           size,
           size
         )
-        ctx.fillStyle = 'pink'
+
         ctx.restore()
       },
     })
